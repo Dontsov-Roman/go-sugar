@@ -11,7 +11,7 @@ import (
 type dBConfig struct {
 	Login    string
 	Password string
-	DBname   string
+	Schema   string
 }
 
 // ConfigStruct Main config struct
@@ -38,5 +38,4 @@ func init() {
 	if errJSON != nil {
 		fmt.Println(errJSON)
 	}
-	fmt.Println(Config)
 }
