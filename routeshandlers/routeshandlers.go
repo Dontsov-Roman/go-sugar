@@ -31,7 +31,7 @@ func DeleteUser(c *gin.Context) {
 	GetAllNoDataJSON(c)
 }
 
-// SaveUser with shouldBindJSON
+// SaveUser with ShouldBindJSON
 func SaveUser(c *gin.Context) {
 	user := users.User{}
 
@@ -40,9 +40,10 @@ func SaveUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
 	} else {
 		fmt.Println(user)
-		if ok, err := user.Save(); ok {
-			if user.ID == 0 {
-				Created(c)
+		var id int = user.ID
+		if savedUser, err := user.Save(); err == nil {
+			if id == 0 {
+				Created(c, savedUser)
 			} else {
 				Saved(c)
 			}
@@ -51,7 +52,7 @@ func SaveUser(c *gin.Context) {
 			if ok {
 				c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
 			} else {
-				c.JSON(http.StatusBadRequest, gin.H{"email": validateError.Email, "phone": validateError.Phone, "id": validateError.ID, "msg": validateError.ErrorMessage})
+				c.JSON(http.StatusBadRequest, gin.H{"msg": validateError.ErrorMessage, "data": validateError})
 			}
 		}
 	}

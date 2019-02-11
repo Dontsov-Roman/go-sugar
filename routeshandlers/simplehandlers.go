@@ -17,8 +17,8 @@ func Saved(c *gin.Context) {
 }
 
 // Created simple created status
-func Created(c *gin.Context) {
-	c.JSON(http.StatusCreated, gin.H{"msg": "Created"})
+func Created(c *gin.Context, data interface{}) {
+	c.JSON(http.StatusCreated, gin.H{"msg": "Created", "data": data})
 }
 
 // BadRequest simple bad request
