@@ -21,6 +21,11 @@ func Created(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"msg": "Created"})
 }
 
+// BadRequest simple bad request
+func BadRequest(c *gin.Context) {
+	c.JSON(http.StatusBadRequest, gin.H{"msg": "Bad request"})
+}
+
 // Deleted Successfull
 func Deleted(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"msg": "deleted"})

@@ -1,8 +1,11 @@
 package request
 
 import (
+	"database/sql"
 	"errors"
 	"strings"
+
+	. "../../db"
 )
 
 // Request structure
@@ -20,9 +23,10 @@ type Request struct {
 
 // Condition for Where method
 type Condition struct {
-	Column   string
-	Operator string
-	Value    string
+	Column         string
+	Operator       string
+	Value          string
+	ConcatOperator string
 }
 
 // IRequestBuilder main interface
@@ -107,8 +111,12 @@ func (r *Request) Values(key string, val string) *Request {
 func (r *Request) Where(cond Condition) *Request {
 	if cond.Column == "" || cond.Value == "" {
 		return r
-	} else if cond.Operator == "" {
+	}
+	if cond.Operator == "" {
 		cond.Operator = "="
+	}
+	if cond.ConcatOperator == "" {
+		cond.ConcatOperator = "AND"
 	}
 	r.where = append(r.where, cond)
 	return r
@@ -116,14 +124,16 @@ func (r *Request) Where(cond Condition) *Request {
 
 func (r *Request) parseWhere() (string, error) {
 	str := " WHERE "
-	if len(r.where) > 0 {
-		for i := 0; i < len(r.where); i++ {
-			str = str + r.where[i].Column + r.where[i].Operator + r.where[i].Value + " AND "
+	length := len(r.where)
+	if length > 0 {
+		for i := 0; i < length; i++ {
+			str = str + r.where[i].Column + r.where[i].Operator + r.where[i].Value
+			if i+1 < length {
+				str = str + " " + r.where[i].ConcatOperator + " "
+			}
 		}
-		return rCut(str, 5), nil
-	} else {
-		return "", errors.New("No conditions in where")
 	}
+	return "", errors.New("No conditions in where")
 }
 
 // OrderBy set order for select
@@ -210,6 +220,24 @@ func (r *Request) ToSQL() (string, error) {
 	}
 
 	return str, nil
+}
+
+// Exec delegate to sql
+func (r *Request) Exec() (sql.Result, error) {
+	str, err := r.ToSQL()
+	if err == nil {
+		return DB.Exec(str)
+	}
+	return nil, err
+}
+
+// Query delegate to sql
+func (r *Request) Query() (*sql.Rows, error) {
+	str, err := r.ToSQL()
+	if err == nil {
+		return DB.Query(str)
+	}
+	return nil, err
 }
 
 func cut(text string, limit int) string {

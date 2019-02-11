@@ -2,21 +2,14 @@ package users
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"strconv"
-
-	"github.com/go-sql-driver/mysql"
 
 	. "../../config"
 	. "../../db"
 	"../../db/request"
 	"github.com/gin-gonic/gin"
 )
-
-type NullTime struct {
-	mysql.NullTime
-}
 
 //User main struct
 type User struct {
@@ -31,6 +24,14 @@ type User struct {
 	DeletedAt NullTime `json:"DeletedAt"`
 }
 
+// ValidateError struct for validate user by table
+type ValidateError struct {
+	ID           string
+	Email        string
+	Phone        string
+	ErrorMessage string
+}
+
 // UserRepo User Repository
 type UserRepo struct {
 	tableName string
@@ -40,25 +41,21 @@ type UserRepo struct {
 // Repo users repository
 var Repo = UserRepo{tableName: Config.DB.Schema + ".users"}
 
-// MarshalJSON for NullTime
-func (ni *NullTime) MarshalJSON() ([]byte, error) {
-	if !ni.Valid {
-		return []byte("null"), nil
-	}
-	return json.Marshal(ni.Time)
-}
-
 // Save entity
-func (u *User) Save() bool {
+func (u *User) Save() (bool, error) {
 	if u.ID != 0 {
 		return Repo.Update(u)
-	} else {
-		_, err := Repo.Create(u)
-		if err != nil {
-			return false
-		}
-		return true
 	}
+	_, err := Repo.Create(u)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+// Validate delegate to Repo
+func (u *User) Validate() (bool, ValidateError) {
+	return Repo.Validate(u)
 }
 
 // Delete entity
@@ -86,17 +83,13 @@ func parseRow(row *sql.Rows) (User, error) {
 
 // GetAll Users
 func (r *UserRepo) GetAll() []User {
-	// str := `Select * from ` + r.tableName
 	Request := request.New()
-	str, sqlErr := Request.Select().From(r.tableName).ToSQL()
-	if sqlErr != nil {
-		return []User{}
-	}
-	rows, err := DB.Query(str)
-	if err != nil {
+	if rows, err := Request.Select().From(r.tableName).Query(); err != nil {
 		fmt.Println(err)
+		return []User{}
+	} else {
+		return parseRows(rows)
 	}
-	return parseRows(rows)
 }
 
 // Create new User
@@ -113,21 +106,58 @@ func (r *UserRepo) Create(user *User) (*User, error) {
 	// fmt.Println(lastId)
 }
 
+// Validate return bool(valid or not) and ValidateError struct
+func (r *UserRepo) Validate(user *User) (bool, ValidateError) {
+	valid := true
+	Request := request.New()
+	id := strconv.Itoa(user.ID)
+	validateError := ValidateError{}
+	rows, err := Request.
+		Select().
+		From(r.tableName).
+		Where(request.Condition{Column: "id", Operator: "=", Value: id, ConcatOperator: "OR"}).
+		Where(request.Condition{Column: "email", Operator: "=", Value: user.Email, ConcatOperator: "OR"}).
+		Where(request.Condition{Column: "phone", Operator: "=", Value: user.Phone, ConcatOperator: "OR"}).
+		Query()
+	if err == nil {
+		selectedUsers := parseRows(rows)
+		for i := 0; i < len(selectedUsers); i++ {
+			current := selectedUsers[i]
+			if current.Email == user.Email {
+				validateError.Email = "User with this email already exist"
+				valid = false
+			}
+			if current.Phone == user.Phone {
+				validateError.Phone = "User with this Phone already exist"
+				valid = false
+			}
+			if current.ID == user.ID {
+				validateError.ID = "User with this ID already exist"
+				valid = false
+			}
+		}
+	} else {
+		valid = false
+		validateError.ErrorMessage = err.Error()
+	}
+	return valid, validateError
+}
+
 // Update user in DB
-func (r *UserRepo) Update(user *User) bool {
+func (r *UserRepo) Update(user *User) (bool, error) {
 	str := `UPDATE ` + r.tableName + ` SET name = ?, type = ?, status = ?, email = ?, phone = ? WHERE id = ?`
 	_, err := DB.Exec(str, user.Name, user.Type, user.Status, user.Email, user.Phone, user.ID)
 	if err != nil {
 		fmt.Println(err)
-		return false
+		return false, err
 	}
-	return true
+	return true, nil
 }
 
 // DeleteByID - remove user from DB
 func (r *UserRepo) DeleteByID(id string) bool {
 	Request := request.New()
-	str, sqlErr := Request.Delete().From(r.tableName).Where(request.Condition{"id", "=", id}).ToSQL()
+	str, sqlErr := Request.Delete().From(r.tableName).Where(request.Condition{"id", "=", id, "OR"}).ToSQL()
 	if sqlErr != nil {
 		fmt.Println(sqlErr)
 		return false

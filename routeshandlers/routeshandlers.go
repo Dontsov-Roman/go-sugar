@@ -40,14 +40,19 @@ func SaveUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
 	} else {
 		fmt.Println(user)
-		if user.Save() {
+		if ok, err := user.Save(); ok {
 			if user.ID == 0 {
 				Created(c)
 			} else {
 				Saved(c)
 			}
 		} else {
-			c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
+			ok, validateError := user.Validate()
+			if ok {
+				c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
+			} else {
+				c.JSON(http.StatusBadRequest, gin.H{"email": validateError.Email, "phone": validateError.Phone, "id": validateError.ID, "msg": validateError.ErrorMessage})
+			}
 		}
 	}
 }

@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	. "../config"
-	_ "github.com/go-sql-driver/mysql"
 )
 
 // SimpleRepo Simple Repository interface
