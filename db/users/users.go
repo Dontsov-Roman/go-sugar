@@ -3,6 +3,7 @@ package users
 import (
 	"database/sql"
 	"fmt"
+	"strconv"
 
 	. "../../config"
 	. "../../db"
@@ -46,7 +47,7 @@ func (u *User) Save() bool {
 
 // Delete entity
 func (u *User) Delete() bool {
-	return Repo.DeleteByID(string(u.ID))
+	return Repo.DeleteByID(strconv.Itoa(u.ID))
 }
 func parseRows(rows *sql.Rows) []User {
 	var users []User
@@ -111,7 +112,6 @@ func (r *UserRepo) Update(user *User) bool {
 func (r *UserRepo) DeleteByID(id string) bool {
 	Request := request.New()
 	str, sqlErr := Request.Delete().From(r.tableName).Where(request.Condition{"id", "=", id}).ToSQL()
-	fmt.Println(str, sqlErr)
 	if sqlErr != nil {
 		fmt.Println(sqlErr)
 		return false

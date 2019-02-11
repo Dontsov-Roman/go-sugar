@@ -1,6 +1,8 @@
 package routeshandlers
 
 import (
+	"strconv"
+
 	"../db/users"
 	"github.com/gin-gonic/gin"
 )
@@ -17,10 +19,12 @@ func GetAllUsers(c *gin.Context) {
 
 // DeleteUser by param path
 func DeleteUser(c *gin.Context) {
-	id := c.Param("id")
-	if users.Repo.DeleteByID(id) {
-		Deleted(c)
-		return
+	if id, err := strconv.Atoi(c.Param("id")); err == nil {
+		user := users.User{ID: id}
+		if user.Delete() {
+			Deleted(c)
+			return
+		}
 	}
 	GetAllNoDataJSON(c)
 }
