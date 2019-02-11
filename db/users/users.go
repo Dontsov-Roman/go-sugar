@@ -2,8 +2,11 @@ package users
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"strconv"
+
+	"github.com/go-sql-driver/mysql"
 
 	. "../../config"
 	. "../../db"
@@ -11,16 +14,21 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type NullTime struct {
+	mysql.NullTime
+}
+
 //User main struct
 type User struct {
-	ID        int
-	Name      string
-	Type      int
-	Status    int
-	Email     string
-	Phone     string
-	CreatedAt string
-	UpdatedAt string
+	ID        int      `json:"ID"`
+	Name      string   `json:"Name"`
+	Type      int      `json:"Type"`
+	Status    int      `json:"Status"`
+	Email     string   `json:"Email"`
+	Phone     string   `json:"Phone"`
+	CreatedAt NullTime `json:"CreatedAt"`
+	UpdatedAt NullTime `json:"UpdatedAt"`
+	DeletedAt NullTime `json:"DeletedAt"`
 }
 
 // UserRepo User Repository
@@ -31,6 +39,14 @@ type UserRepo struct {
 
 // Repo users repository
 var Repo = UserRepo{tableName: Config.DB.Schema + ".users"}
+
+// MarshalJSON for NullTime
+func (ni *NullTime) MarshalJSON() ([]byte, error) {
+	if !ni.Valid {
+		return []byte("null"), nil
+	}
+	return json.Marshal(ni.Time)
+}
 
 // Save entity
 func (u *User) Save() bool {
@@ -64,7 +80,7 @@ func parseRows(rows *sql.Rows) []User {
 }
 func parseRow(row *sql.Rows) (User, error) {
 	p := User{}
-	err := row.Scan(&p.ID, &p.Type, &p.Email, &p.Phone, &p.Name, &p.CreatedAt, &p.UpdatedAt, &p.Status)
+	err := row.Scan(&p.ID, &p.Type, &p.Email, &p.Phone, &p.Name, &p.CreatedAt, &p.UpdatedAt, &p.Status, &p.DeletedAt)
 	return p, err
 }
 

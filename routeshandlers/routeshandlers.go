@@ -1,6 +1,8 @@
 package routeshandlers
 
 import (
+	"fmt"
+	"net/http"
 	"strconv"
 
 	"../db/users"
@@ -27,4 +29,25 @@ func DeleteUser(c *gin.Context) {
 		}
 	}
 	GetAllNoDataJSON(c)
+}
+
+// SaveUser with shouldBindJSON
+func SaveUser(c *gin.Context) {
+	user := users.User{}
+
+	if err := c.ShouldBindJSON(&user); err != nil {
+		fmt.Println(err)
+		c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
+	} else {
+		fmt.Println(user)
+		if user.Save() {
+			if user.ID == 0 {
+				Created(c)
+			} else {
+				Saved(c)
+			}
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
+		}
+	}
 }
