@@ -131,10 +131,11 @@ func DeleteOrder(c *gin.Context) {
 
 // SaveOrder with ShouldBindJSON
 func SaveOrder(c *gin.Context) {
-	item := orders.Order{}
+	user := users.User{}
+	item := orders.Order{User: &user}
 
 	if err := c.ShouldBindJSON(&item); err != nil {
-		fmt.Println(err)
+		fmt.Println("shouldBindJSON", err)
 		c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
 	} else {
 		var id int = item.ID
