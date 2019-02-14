@@ -132,7 +132,6 @@ func DeleteOrder(c *gin.Context) {
 // SaveOrder with ShouldBindJSON
 func SaveOrder(c *gin.Context) {
 	item := orders.Order{}
-	fmt.Println(c.GetString(("Description")))
 
 	if err := c.ShouldBindJSON(&item); err != nil {
 		fmt.Println("shouldBindJSON", err)

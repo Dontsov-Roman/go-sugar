@@ -1,4 +1,4 @@
-package orders
+package ordersprices
 
 import (
 	"fmt"
@@ -9,25 +9,25 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Repository Orders
+// Repository OrderPrices
 type Repository struct {
 	tableName string
 	Context   *gin.Context
 }
 
-// GetAll Orders
-func (r *Repository) GetAll() []Order {
+// GetAll OrderPrices
+func (r *Repository) GetAll() []OrderPrice {
 	Request := request.New(DB)
 	rows, err := Request.Select().From(r.tableName).Query()
 	if err != nil {
 		fmt.Println(err)
-		return []Order{}
+		return []OrderPrice{}
 	}
 	return parseRows(rows)
 }
 
-// Create new Order
-func (r *Repository) Create(item *Order) (*Order, error) {
+// Create new OrderPrice
+func (r *Repository) Create(item *OrderPrice) (*OrderPrice, error) {
 	str := `INSERT INTO ` + r.tableName + ` (description, status) values(?, ?, ?)`
 	result, err := DB.Exec(str, item.Description, item.Status)
 	if err != nil {
@@ -44,7 +44,7 @@ func (r *Repository) Create(item *Order) (*Order, error) {
 }
 
 // Update price in DB
-func (r *Repository) Update(item *Order) (bool, error) {
+func (r *Repository) Update(item *OrderPrice) (bool, error) {
 	str := `UPDATE ` + r.tableName + ` SET description = ?, status = ? WHERE id = ?`
 	_, err := DB.Exec(str, item.Description, item.Status)
 	if err != nil {
@@ -55,7 +55,7 @@ func (r *Repository) Update(item *Order) (bool, error) {
 }
 
 // Validate return bool(valid or not) and ValidateError struct
-func (r *Repository) Validate(item *Order) (bool, ValidateError) {
+func (r *Repository) Validate(item *OrderPrice) (bool, ValidateError) {
 	valid := true
 	Request := request.New(DB)
 	id := strconv.Itoa(item.ID)
@@ -66,11 +66,11 @@ func (r *Repository) Validate(item *Order) (bool, ValidateError) {
 		Where(request.Condition{Column: "id", Operator: "=", Value: id, ConcatOperator: "OR"}).
 		Query()
 	if err == nil {
-		selectedOrders := parseRows(rows)
-		for i := 0; i < len(selectedOrders); i++ {
-			current := selectedOrders[i]
+		selectedOrderPrices := parseRows(rows)
+		for i := 0; i < len(selectedOrderPrices); i++ {
+			current := selectedOrderPrices[i]
 			if current.ID == item.ID {
-				validateError.ID = "Order with this ID already exist"
+				validateError.ID = "OrderPrice with this ID already exist"
 				validateError.AddToErrorMessage(validateError.ID)
 				valid = false
 			}
