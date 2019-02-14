@@ -6,7 +6,6 @@ import (
 
 	. "../../db"
 	"../../db/request"
-	"../users"
 	"github.com/gin-gonic/gin"
 )
 
@@ -28,7 +27,7 @@ func (r *Repository) GetAll() []Order {
 }
 
 // Create new Order
-func (r *Repository) Create(item *Order, user *users.User) (*Order, error) {
+func (r *Repository) Create(item *Order) (*Order, error) {
 	str := `INSERT INTO ` + r.tableName + ` (description, status) values(?, ?, ?)`
 	result, err := DB.Exec(str, item.Description, item.Status)
 	if err != nil {
@@ -38,10 +37,21 @@ func (r *Repository) Create(item *Order, user *users.User) (*Order, error) {
 	if id, insertErr := result.LastInsertId(); insertErr == nil {
 		item.ID = int(id)
 	}
-	for i := 0; i < len(item.Prices); i++ {
+	// for i := 0; i < len(item.Prices); i++ {
 
-	}
+	// }
 	return item, nil
+}
+
+// Update price in DB
+func (r *Repository) Update(item *Order) (bool, error) {
+	str := `UPDATE ` + r.tableName + ` SET description = ?, status = ? WHERE id = ?`
+	_, err := DB.Exec(str, item.Description, item.Status)
+	if err != nil {
+		fmt.Println(err)
+		return false, err
+	}
+	return true, nil
 }
 
 // Validate return bool(valid or not) and ValidateError struct
@@ -70,17 +80,6 @@ func (r *Repository) Validate(item *Order) (bool, ValidateError) {
 		validateError.ErrorMessage = err.Error()
 	}
 	return valid, validateError
-}
-
-// Update price in DB
-func (r *Repository) Update(item *Order, user *users.User) (bool, error) {
-	str := `UPDATE ` + r.tableName + ` SET description = ?, status = ? WHERE id = ?`
-	_, err := DB.Exec(str, item.Description, item.Status)
-	if err != nil {
-		fmt.Println(err)
-		return false, err
-	}
-	return true, nil
 }
 
 // DeleteByID - remove user from DB

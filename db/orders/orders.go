@@ -7,19 +7,18 @@ import (
 
 	. "../../config"
 	. "../../db"
-	"../users"
 )
 
 // Order main struct
 type Order struct {
-	ID          int         `json:"ID"`
-	Description string      `json:"Name"`
-	Status      int         `json:"Status"`
-	User        *users.User `json:"User"`
-	Prices      []int       `json:"Prices"`
-	CreatedAt   NullTime    `json:"CreatedAt"`
-	UpdatedAt   NullTime    `json:"UpdatedAt"`
-	DeletedAt   NullTime    `json:"DeletedAt"`
+	ID          int      `json:"ID"`
+	Description string   `json:"Name"`
+	Status      int      `json:"Status"`
+	UserID      int      `json:"UserID"`
+	Prices      []int    `json:"Prices"`
+	CreatedAt   NullTime `json:"CreatedAt"`
+	UpdatedAt   NullTime `json:"UpdatedAt"`
+	DeletedAt   NullTime `json:"DeletedAt"`
 }
 
 // Repo users repository
@@ -28,13 +27,13 @@ var Repo = Repository{tableName: Config.DB.Schema + ".orders"}
 // Save entity
 func (item *Order) Save() (*Order, error) {
 	if item.ID != 0 {
-		ok, err := Repo.Update(item, item.User)
+		ok, err := Repo.Update(item)
 		if !ok {
 			return nil, err
 		}
 		return item, err
 	}
-	return Repo.Create(item, item.User)
+	return Repo.Create(item)
 }
 
 // Validate delegate to Repo
