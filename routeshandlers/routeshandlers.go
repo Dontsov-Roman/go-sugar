@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"../db/orders"
 	"../db/prices"
 	"../db/users"
 	"github.com/gin-gonic/gin"
@@ -83,6 +84,54 @@ func DeletePrice(c *gin.Context) {
 // SavePrice with ShouldBindJSON
 func SavePrice(c *gin.Context) {
 	item := prices.Price{}
+
+	if err := c.ShouldBindJSON(&item); err != nil {
+		fmt.Println(err)
+		c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
+	} else {
+		var id int = item.ID
+		if savedItem, err := item.Save(); err == nil {
+			if id == 0 {
+				Created(c, savedItem)
+			} else {
+				Saved(c)
+			}
+		} else {
+			ok, validateError := item.Validate()
+			if ok {
+				c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
+			} else {
+				c.JSON(http.StatusBadRequest, gin.H{"msg": validateError.ErrorMessage, "data": validateError})
+			}
+		}
+	}
+}
+
+// GetAllOrders - get all prices for main screen
+func GetAllOrders(c *gin.Context) {
+	data := orders.Repo.GetAll()
+	if len(data) > 0 {
+		c.JSON(200, gin.H{"data": data})
+		return
+	}
+	GetAllNoDataJSON(c)
+}
+
+// DeleteOrder by param path
+func DeleteOrder(c *gin.Context) {
+	if id, err := strconv.Atoi(c.Param("id")); err == nil {
+		item := orders.Order{ID: id}
+		if item.Delete() {
+			Deleted(c)
+			return
+		}
+	}
+	GetAllNoDataJSON(c)
+}
+
+// SaveOrder with ShouldBindJSON
+func SaveOrder(c *gin.Context) {
+	item := orders.Order{}
 
 	if err := c.ShouldBindJSON(&item); err != nil {
 		fmt.Println(err)
