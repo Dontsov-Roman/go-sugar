@@ -22,7 +22,7 @@ type Price struct {
 }
 
 // Repo users repository
-var Repo = PriceRepo{tableName: Config.DB.Schema + ".prices"}
+var Repo = Repository{tableName: Config.DB.Schema + ".prices"}
 
 // Save entity
 func (u *Price) Save() (*Price, error) {

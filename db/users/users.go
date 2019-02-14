@@ -23,7 +23,7 @@ type User struct {
 }
 
 // Repo users repository
-var Repo = UserRepo{tableName: Config.DB.Schema + ".users"}
+var Repo = Repository{tableName: Config.DB.Schema + ".users"}
 
 // Save entity
 func (u *User) Save() (*User, error) {

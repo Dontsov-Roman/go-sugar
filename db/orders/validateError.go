@@ -1,4 +1,4 @@
-package prices
+package orders
 
 // ValidateError struct for validate user by table
 type ValidateError struct {

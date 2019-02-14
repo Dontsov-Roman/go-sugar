@@ -9,15 +9,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// PriceRepo Price Repository
-type PriceRepo struct {
+// Repository Price
+type Repository struct {
 	tableName string
 	Context   *gin.Context
 }
 
 // GetAll Prices
-func (r *PriceRepo) GetAll() []Price {
-	Request := request.New()
+func (r *Repository) GetAll() []Price {
+	Request := request.New(DB)
 	rows, err := Request.Select().From(r.tableName).Query()
 	if err != nil {
 		fmt.Println(err)
@@ -27,7 +27,7 @@ func (r *PriceRepo) GetAll() []Price {
 }
 
 // Create new Price
-func (r *PriceRepo) Create(item *Price) (*Price, error) {
+func (r *Repository) Create(item *Price) (*Price, error) {
 	str := `INSERT INTO ` + r.tableName + ` (name, status, price, time) values(?, ?, ?, ?)`
 	result, err := DB.Exec(str, item.Name, item.Status, item.Price, item.Time)
 	if err != nil {
@@ -41,9 +41,9 @@ func (r *PriceRepo) Create(item *Price) (*Price, error) {
 }
 
 // Validate return bool(valid or not) and ValidateError struct
-func (r *PriceRepo) Validate(item *Price) (bool, ValidateError) {
+func (r *Repository) Validate(item *Price) (bool, ValidateError) {
 	valid := true
-	Request := request.New()
+	Request := request.New(DB)
 	id := strconv.Itoa(item.ID)
 	validateError := ValidateError{}
 	rows, err := Request.
@@ -69,7 +69,7 @@ func (r *PriceRepo) Validate(item *Price) (bool, ValidateError) {
 }
 
 // Update price in DB
-func (r *PriceRepo) Update(item *Price) (bool, error) {
+func (r *Repository) Update(item *Price) (bool, error) {
 	str := `UPDATE ` + r.tableName + ` SET name = ?, status = ?, price = ?, time = ? WHERE id = ?`
 	_, err := DB.Exec(str, item.Name, item.Status, item.Price, item.Time, item.ID)
 	if err != nil {
@@ -80,8 +80,8 @@ func (r *PriceRepo) Update(item *Price) (bool, error) {
 }
 
 // DeleteByID - remove user from DB
-func (r *PriceRepo) DeleteByID(id string) bool {
-	Request := request.New()
+func (r *Repository) DeleteByID(id string) bool {
+	Request := request.New(DB)
 	str, sqlErr := Request.
 		Delete().
 		From(r.tableName).

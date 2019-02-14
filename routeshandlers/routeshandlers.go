@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"../db/prices"
 	"../db/users"
 	"github.com/gin-gonic/gin"
 )
@@ -33,22 +34,69 @@ func DeleteUser(c *gin.Context) {
 
 // SaveUser with ShouldBindJSON
 func SaveUser(c *gin.Context) {
-	user := users.User{}
+	item := users.User{}
 
-	if err := c.ShouldBindJSON(&user); err != nil {
+	if err := c.ShouldBindJSON(&item); err != nil {
 		fmt.Println(err)
 		c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
 	} else {
-		fmt.Println(user)
-		var id int = user.ID
-		if savedUser, err := user.Save(); err == nil {
+		var id int = item.ID
+		if savedItem, err := item.Save(); err == nil {
 			if id == 0 {
-				Created(c, savedUser)
+				Created(c, savedItem)
 			} else {
 				Saved(c)
 			}
 		} else {
-			ok, validateError := user.Validate()
+			ok, validateError := item.Validate()
+			if ok {
+				c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
+			} else {
+				c.JSON(http.StatusBadRequest, gin.H{"msg": validateError.ErrorMessage, "data": validateError})
+			}
+		}
+	}
+}
+
+// GetAllPrices - get all prices for main screen
+func GetAllPrices(c *gin.Context) {
+	data := prices.Repo.GetAll()
+	if len(data) > 0 {
+		c.JSON(200, gin.H{"data": data})
+		return
+	}
+	GetAllNoDataJSON(c)
+}
+
+// DeletePrice by param path
+func DeletePrice(c *gin.Context) {
+	if id, err := strconv.Atoi(c.Param("id")); err == nil {
+		item := prices.Price{ID: id}
+		if item.Delete() {
+			Deleted(c)
+			return
+		}
+	}
+	GetAllNoDataJSON(c)
+}
+
+// SavePrice with ShouldBindJSON
+func SavePrice(c *gin.Context) {
+	item := prices.Price{}
+
+	if err := c.ShouldBindJSON(&item); err != nil {
+		fmt.Println(err)
+		c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
+	} else {
+		var id int = item.ID
+		if savedItem, err := item.Save(); err == nil {
+			if id == 0 {
+				Created(c, savedItem)
+			} else {
+				Saved(c)
+			}
+		} else {
+			ok, validateError := item.Validate()
 			if ok {
 				c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
 			} else {

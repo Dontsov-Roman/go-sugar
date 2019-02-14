@@ -4,8 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"strings"
-
-	. "../../db"
 )
 
 // Request structure
@@ -19,6 +17,7 @@ type Request struct {
 	orderAsc    bool
 	offset      int
 	limit       int
+	db          *sql.DB
 }
 
 // Condition for Where method
@@ -50,8 +49,16 @@ type IRequestBuilder interface {
 }
 
 // New Request
-func New() Request {
-	return Request{}
+func New(db *sql.DB) Request {
+	request := Request{}
+	request.SetDB(db)
+	return request
+}
+
+// SetDB to request
+func (r *Request) SetDB(db *sql.DB) *Request {
+	r.db = db
+	return r
 }
 
 // Select === SetType(1)
@@ -226,7 +233,7 @@ func (r *Request) ToSQL() (string, error) {
 func (r *Request) Exec() (sql.Result, error) {
 	str, err := r.ToSQL()
 	if err == nil {
-		return DB.Exec(str)
+		return r.db.Exec(str)
 	}
 	return nil, err
 }
@@ -235,7 +242,7 @@ func (r *Request) Exec() (sql.Result, error) {
 func (r *Request) Query() (*sql.Rows, error) {
 	str, err := r.ToSQL()
 	if err == nil {
-		return DB.Query(str)
+		return r.db.Query(str)
 	}
 	return nil, err
 }

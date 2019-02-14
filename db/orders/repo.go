@@ -1,4 +1,4 @@
-package users
+package orders
 
 import (
 	"fmt"
@@ -9,67 +9,55 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Repository User Repository
+// Repository Orders
 type Repository struct {
 	tableName string
 	Context   *gin.Context
 }
 
-// GetAll Users
-func (r *Repository) GetAll() []User {
+// GetAll Orders
+func (r *Repository) GetAll() []Order {
 	Request := request.New(DB)
 	rows, err := Request.Select().From(r.tableName).Query()
 	if err != nil {
 		fmt.Println(err)
-		return []User{}
+		return []Order{}
 	}
 	return parseRows(rows)
 }
 
-// Create new User
-func (r *Repository) Create(user *User) (*User, error) {
-	str := `INSERT INTO ` + r.tableName + ` (type, email, phone, name, status) values(?, ?, ?, ?, ?)`
-	result, err := DB.Exec(str, user.Type, user.Email, user.Phone, user.Name, user.Status)
+// Create new Order
+func (r *Repository) Create(item *Order) (*Order, error) {
+	str := `INSERT INTO ` + r.tableName + ` (user_id, description, status) values(?, ?, ?)`
+	result, err := DB.Exec(str, item.UserID, item.Description, item.Status)
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
 	}
 	if id, insertErr := result.LastInsertId(); insertErr == nil {
-		user.ID = int(id)
+		item.ID = int(id)
 	}
-	return user, nil
+	return item, nil
 }
 
 // Validate return bool(valid or not) and ValidateError struct
-func (r *Repository) Validate(user *User) (bool, ValidateError) {
+func (r *Repository) Validate(item *Order) (bool, ValidateError) {
 	valid := true
 	Request := request.New(DB)
-	id := strconv.Itoa(user.ID)
+	id := strconv.Itoa(item.ID)
 	validateError := ValidateError{}
 	rows, err := Request.
 		Select().
 		From(r.tableName).
 		Where(request.Condition{Column: "id", Operator: "=", Value: id, ConcatOperator: "OR"}).
-		Where(request.Condition{Column: "email", Operator: "=", Value: user.Email, ConcatOperator: "OR"}).
-		Where(request.Condition{Column: "phone", Operator: "=", Value: user.Phone, ConcatOperator: "OR"}).
 		Query()
 	if err == nil {
-		selectedUsers := parseRows(rows)
-		for i := 0; i < len(selectedUsers); i++ {
-			current := selectedUsers[i]
-			if current.ID == user.ID {
-				validateError.ID = "User with this ID already exist"
+		selectedOrders := parseRows(rows)
+		for i := 0; i < len(selectedOrders); i++ {
+			current := selectedOrders[i]
+			if current.ID == item.ID {
+				validateError.ID = "Order with this ID already exist"
 				validateError.AddToErrorMessage(validateError.ID)
-				valid = false
-			}
-			if current.Email == user.Email {
-				validateError.Email = "User with this email already exist"
-				validateError.AddToErrorMessage(validateError.Email)
-				valid = false
-			}
-			if current.Phone == user.Phone {
-				validateError.Phone = "User with this Phone already exist"
-				validateError.AddToErrorMessage(validateError.Phone)
 				valid = false
 			}
 		}
@@ -80,10 +68,10 @@ func (r *Repository) Validate(user *User) (bool, ValidateError) {
 	return valid, validateError
 }
 
-// Update user in DB
-func (r *Repository) Update(user *User) (bool, error) {
-	str := `UPDATE ` + r.tableName + ` SET name = ?, type = ?, status = ?, email = ?, phone = ? WHERE id = ?`
-	_, err := DB.Exec(str, user.Name, user.Type, user.Status, user.Email, user.Phone, user.ID)
+// Update price in DB
+func (r *Repository) Update(item *Order) (bool, error) {
+	str := `UPDATE ` + r.tableName + ` SET user_id = ?, description = ?, status = ? WHERE id = ?`
+	_, err := DB.Exec(str, item.UserID, item.Description, item.Status)
 	if err != nil {
 		fmt.Println(err)
 		return false, err
