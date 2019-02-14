@@ -6,6 +6,7 @@ import (
 
 	. "../../db"
 	"../../db/request"
+	"../users"
 	"github.com/gin-gonic/gin"
 )
 
@@ -27,9 +28,9 @@ func (r *Repository) GetAll() []Order {
 }
 
 // Create new Order
-func (r *Repository) Create(item *Order) (*Order, error) {
+func (r *Repository) Create(item *Order, user *users.User) (*Order, error) {
 	str := `INSERT INTO ` + r.tableName + ` (user_id, description, status) values(?, ?, ?)`
-	result, err := DB.Exec(str, item.UserID, item.Description, item.Status)
+	result, err := DB.Exec(str, item.Description, item.Status)
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
@@ -71,7 +72,7 @@ func (r *Repository) Validate(item *Order) (bool, ValidateError) {
 // Update price in DB
 func (r *Repository) Update(item *Order) (bool, error) {
 	str := `UPDATE ` + r.tableName + ` SET user_id = ?, description = ?, status = ? WHERE id = ?`
-	_, err := DB.Exec(str, item.UserID, item.Description, item.Status)
+	_, err := DB.Exec(str, item.Description, item.Status)
 	if err != nil {
 		fmt.Println(err)
 		return false, err

@@ -36,7 +36,7 @@ CREATE TABLE `users` (
   UNIQUE KEY `id_UNIQUE` (`id`),
   UNIQUE KEY `phone_UNIQUE` (`phone`),
   UNIQUE KEY `email_UNIQUE` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=45 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -45,7 +45,6 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (15,1,'dontsovroman@gmail.com','380974885047','Roman','2019-02-11 15:19:30','2019-02-11 15:19:30',1,NULL),(16,1,'dontsovroman1@gmail.com','3809748850471','Roman','2019-02-11 15:35:40','2019-02-11 15:35:40',1,NULL),(21,2,'dontsovroman11@gmail.com','38097488504711','Roman','2019-02-11 16:03:34','2019-02-11 16:03:34',3,NULL),(25,2,'dontsovroman112@gmail.com','380974885047112','Roman','2019-02-11 17:31:41','2019-02-11 17:31:41',3,NULL),(30,2,'dontsovroman1123@gmail.com','3809748850471123','Roman','2019-02-11 18:44:28','2019-02-11 18:44:28',3,NULL),(31,2,'dontsovroman13@gmail.com','38097488504713','Roman','2019-02-11 18:46:27','2019-02-11 18:46:27',3,NULL),(33,2,'dontsovroman123@gmail.com','380974885047123','Roman','2019-02-11 18:54:25','2019-02-11 18:54:25',3,NULL),(34,2,'dontsovroman12345@gmail.com','38097488504712345','Roman','2019-02-11 18:59:26','2019-02-11 18:59:58',3,NULL);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -58,4 +57,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-02-14 22:25:10
+-- Dump completed on 2019-02-14 23:55:10

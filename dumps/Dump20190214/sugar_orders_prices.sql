@@ -24,9 +24,11 @@ DROP TABLE IF EXISTS `orders_prices`;
  SET character_set_client = utf8mb4 ;
 CREATE TABLE `orders_prices` (
   `order_id` int(10) unsigned NOT NULL,
+  `user_id` int(10) unsigned NOT NULL,
   `price_id` int(10) unsigned NOT NULL,
   UNIQUE KEY `order_price` (`order_id`,`price_id`) USING BTREE,
   KEY `price_id_idx` (`price_id`) /*!80000 INVISIBLE */,
+  KEY `user_id_idx` (`user_id`),
   CONSTRAINT `order_id` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
   CONSTRAINT `price_id` FOREIGN KEY (`price_id`) REFERENCES `prices` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
@@ -50,4 +52,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-02-14 22:25:10
+-- Dump completed on 2019-02-14 23:55:09

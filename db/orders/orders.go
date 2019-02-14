@@ -12,7 +12,6 @@ import (
 // Order main struct
 type Order struct {
 	ID          int      `json:"ID"`
-	UserID      int      `json:"UserID"`
 	Description string   `json:"Name"`
 	Status      int      `json:"Status"`
 	Prices      []int    `json:"Prices"`
@@ -60,6 +59,6 @@ func parseRows(rows *sql.Rows) []Order {
 }
 func parseRow(row *sql.Rows) (Order, error) {
 	p := Order{}
-	err := row.Scan(&p.ID, &p.UserID, &p.Description, &p.Status, &p.Prices, &p.CreatedAt, &p.UpdatedAt, &p.DeletedAt)
+	err := row.Scan(&p.ID, &p.Description, &p.Status, &p.Prices, &p.CreatedAt, &p.UpdatedAt, &p.DeletedAt)
 	return p, err
 }

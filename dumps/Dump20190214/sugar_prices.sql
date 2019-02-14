@@ -33,7 +33,7 @@ CREATE TABLE `prices` (
   `deleted_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -42,6 +42,7 @@ CREATE TABLE `prices` (
 
 LOCK TABLES `prices` WRITE;
 /*!40000 ALTER TABLE `prices` DISABLE KEYS */;
+INSERT INTO `prices` VALUES (2,'Бедра',3,170,45,'2019-02-14 23:00:03','2019-02-14 23:00:03',NULL),(3,'Глубокое бикини',1,190,30,'2019-02-14 23:00:29','2019-02-14 23:00:29',NULL),(4,'Бикини',1,150,30,'2019-02-14 23:00:46','2019-02-14 23:00:46',NULL),(5,'Ножки полностью',1,300,60,'2019-02-14 23:14:32','2019-02-14 23:19:34',NULL);
 /*!40000 ALTER TABLE `prices` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -54,4 +55,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-02-14 22:25:10
+-- Dump completed on 2019-02-14 23:55:09
