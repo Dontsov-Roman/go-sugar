@@ -7,42 +7,44 @@ import (
 
 	. "../../config"
 	. "../../db"
+	"../users"
 )
 
 // Order main struct
 type Order struct {
-	ID          int      `json:"ID"`
-	Description string   `json:"Name"`
-	Status      int      `json:"Status"`
-	Prices      []int    `json:"Prices"`
-	CreatedAt   NullTime `json:"CreatedAt"`
-	UpdatedAt   NullTime `json:"UpdatedAt"`
-	DeletedAt   NullTime `json:"DeletedAt"`
+	ID          int         `json:"ID"`
+	Description string      `json:"Name"`
+	Status      int         `json:"Status"`
+	User        *users.User `json:"User"`
+	Prices      []int       `json:"Prices"`
+	CreatedAt   NullTime    `json:"CreatedAt"`
+	UpdatedAt   NullTime    `json:"UpdatedAt"`
+	DeletedAt   NullTime    `json:"DeletedAt"`
 }
 
 // Repo users repository
 var Repo = Repository{tableName: Config.DB.Schema + ".orders"}
 
 // Save entity
-func (u *Order) Save() (*Order, error) {
-	if u.ID != 0 {
-		ok, err := Repo.Update(u)
+func (item *Order) Save() (*Order, error) {
+	if item.ID != 0 {
+		ok, err := Repo.Update(item, item.User)
 		if !ok {
 			return nil, err
 		}
-		return u, err
+		return item, err
 	}
-	return Repo.Create(u)
+	return Repo.Create(item, item.User)
 }
 
 // Validate delegate to Repo
-func (u *Order) Validate() (bool, ValidateError) {
-	return Repo.Validate(u)
+func (item *Order) Validate() (bool, ValidateError) {
+	return Repo.Validate(item)
 }
 
 // Delete entity
-func (u *Order) Delete() bool {
-	return Repo.DeleteByID(strconv.Itoa(u.ID))
+func (item *Order) Delete() bool {
+	return Repo.DeleteByID(strconv.Itoa(item.ID))
 }
 func parseRows(rows *sql.Rows) []Order {
 	var users []Order
