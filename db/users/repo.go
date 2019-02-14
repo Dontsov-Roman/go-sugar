@@ -103,6 +103,7 @@ func (r *Repository) DeleteByID(id string) bool {
 		fmt.Println(sqlErr)
 		return false
 	}
+	fmt.Println(str)
 	result, err := DB.Exec(str)
 	if err != nil {
 		fmt.Println(err)

@@ -15,7 +15,7 @@ type Price struct {
 	Name      string   `json:"Name"`
 	Status    int      `json:"Status"`
 	Price     int      `json:"Price"`
-	Time      int      `json:Time` // in minutes
+	Time      int      `json:"Time"` // in minutes
 	CreatedAt NullTime `json:"CreatedAt"`
 	UpdatedAt NullTime `json:"UpdatedAt"`
 	DeletedAt NullTime `json:"DeletedAt"`

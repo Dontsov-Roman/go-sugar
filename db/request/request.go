@@ -3,6 +3,7 @@ package request
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"strings"
 )
 
@@ -132,13 +133,16 @@ func (r *Request) Where(cond Condition) *Request {
 func (r *Request) parseWhere() (string, error) {
 	str := " WHERE "
 	length := len(r.where)
+	fmt.Println(r.where, length)
 	if length > 0 {
 		for i := 0; i < length; i++ {
+			fmt.Println(length, i)
 			str = str + r.where[i].Column + r.where[i].Operator + r.where[i].Value
 			if i+1 < length {
 				str = str + " " + r.where[i].ConcatOperator + " "
 			}
 		}
+		return str, nil
 	}
 	return "", errors.New("No conditions in where")
 }
@@ -221,8 +225,11 @@ func (r *Request) ToSQL() (string, error) {
 		str = str + " (" + keys + ") VALUES (" + values + ")"
 	case 4:
 		str = "DELETE FROM " + r.tableName
-		if where, err := r.parseWhere(); err == nil {
+		where, err := r.parseWhere()
+		if err == nil {
 			str = str + where
+		} else {
+			return "", err
 		}
 	}
 
