@@ -27,49 +27,37 @@ func (r *PriceRepo) GetAll() []Price {
 }
 
 // Create new Price
-func (r *PriceRepo) Create(user *Price) (*Price, error) {
-	str := `INSERT INTO ` + r.tableName + ` (type, email, phone, name, status) values(?, ?, ?, ?, ?)`
-	result, err := DB.Exec(str, user.Type, user.Email, user.Phone, user.Name, user.Status)
+func (r *PriceRepo) Create(item *Price) (*Price, error) {
+	str := `INSERT INTO ` + r.tableName + ` (name, status, price, time) values(?, ?, ?, ?)`
+	result, err := DB.Exec(str, item.Name, item.Status, item.Price, item.Time)
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
 	}
 	if id, insertErr := result.LastInsertId(); insertErr == nil {
-		user.ID = int(id)
+		item.ID = int(id)
 	}
-	return user, nil
+	return item, nil
 }
 
 // Validate return bool(valid or not) and ValidateError struct
-func (r *PriceRepo) Validate(user *Price) (bool, ValidateError) {
+func (r *PriceRepo) Validate(item *Price) (bool, ValidateError) {
 	valid := true
 	Request := request.New()
-	id := strconv.Itoa(user.ID)
+	id := strconv.Itoa(item.ID)
 	validateError := ValidateError{}
 	rows, err := Request.
 		Select().
 		From(r.tableName).
 		Where(request.Condition{Column: "id", Operator: "=", Value: id, ConcatOperator: "OR"}).
-		Where(request.Condition{Column: "email", Operator: "=", Value: user.Email, ConcatOperator: "OR"}).
-		Where(request.Condition{Column: "phone", Operator: "=", Value: user.Phone, ConcatOperator: "OR"}).
 		Query()
 	if err == nil {
 		selectedPrices := parseRows(rows)
 		for i := 0; i < len(selectedPrices); i++ {
 			current := selectedPrices[i]
-			if current.ID == user.ID {
+			if current.ID == item.ID {
 				validateError.ID = "Price with this ID already exist"
 				validateError.AddToErrorMessage(validateError.ID)
-				valid = false
-			}
-			if current.Email == user.Email {
-				validateError.Email = "Price with this email already exist"
-				validateError.AddToErrorMessage(validateError.Email)
-				valid = false
-			}
-			if current.Phone == user.Phone {
-				validateError.Phone = "Price with this Phone already exist"
-				validateError.AddToErrorMessage(validateError.Phone)
 				valid = false
 			}
 		}
@@ -80,10 +68,10 @@ func (r *PriceRepo) Validate(user *Price) (bool, ValidateError) {
 	return valid, validateError
 }
 
-// Update user in DB
-func (r *PriceRepo) Update(user *Price) (bool, error) {
-	str := `UPDATE ` + r.tableName + ` SET name = ?, type = ?, status = ?, email = ?, phone = ? WHERE id = ?`
-	_, err := DB.Exec(str, user.Name, user.Type, user.Status, user.Email, user.Phone, user.ID)
+// Update price in DB
+func (r *PriceRepo) Update(item *Price) (bool, error) {
+	str := `UPDATE ` + r.tableName + ` SET name = ?, status = ?, price = ?, time = ? WHERE id = ?`
+	_, err := DB.Exec(str, item.Name, item.Status, item.Price, item.Time, item.ID)
 	if err != nil {
 		fmt.Println(err)
 		return false, err

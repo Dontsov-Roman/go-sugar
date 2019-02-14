@@ -13,10 +13,9 @@ import (
 type Price struct {
 	ID        int      `json:"ID"`
 	Name      string   `json:"Name"`
-	Type      int      `json:"Type"`
 	Status    int      `json:"Status"`
-	Email     string   `json:"Email"`
-	Phone     string   `json:"Phone"`
+	Price     int      `json:"Price"`
+	Time      int      `json:Time` // in minutes
 	CreatedAt NullTime `json:"CreatedAt"`
 	UpdatedAt NullTime `json:"UpdatedAt"`
 	DeletedAt NullTime `json:"DeletedAt"`
@@ -61,6 +60,6 @@ func parseRows(rows *sql.Rows) []Price {
 }
 func parseRow(row *sql.Rows) (Price, error) {
 	p := Price{}
-	err := row.Scan(&p.ID, &p.Type, &p.Email, &p.Phone, &p.Name, &p.CreatedAt, &p.UpdatedAt, &p.Status, &p.DeletedAt)
+	err := row.Scan(&p.ID, &p.Name, &p.Status, &p.Price, &p.Time, &p.CreatedAt, &p.UpdatedAt, &p.DeletedAt)
 	return p, err
 }
