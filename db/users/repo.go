@@ -5,18 +5,26 @@ import (
 	"encoding/hex"
 	"fmt"
 	"strconv"
+	"time"
 
+	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
+
+	. "../../config"
 	. "../../db"
 	"../../db/request"
-	"github.com/gin-gonic/gin"
 )
 
 // Repository User Repository
 type Repository struct {
-	tableName string
-	salt      string
-	Context   *gin.Context
+	tableName      string
+	salt           string
+	secretForToken string
+	Context        *gin.Context
 }
+
+// Repo users repository
+var Repo = Repository{tableName: Config.DB.Schema + ".users", salt: "sweet_sugar_67n334g6", secretForToken: "sweet_sugar_346436bb43gh463"}
 
 // GetAll Users
 func (r *Repository) GetAll() []User {
@@ -125,4 +133,48 @@ func (r *Repository) CreateHash(str string) string {
 	encodedStr := hex.EncodeToString(sha1Bytes[:])
 	fmt.Println(str + ": " + encodedStr)
 	return encodedStr
+}
+
+// ParseToken return a User
+func (r *Repository) ParseToken(tokenString string) (User, error) {
+	user := User{}
+	mapToken, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		// Don't forget to validate the alg is what you expect:
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+
+		// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")
+		return r.secretForToken, nil
+	})
+	if claims, ok := mapToken.Claims.(jwt.MapClaims); ok && mapToken.Valid {
+		fmt.Println(claims)
+		// user.ID = claims["ID"]
+		// user.Name = claims["Name"]
+		// user.Email = claims["Email"]
+		// user.Phone = claims["Phone"]
+		// user.Status = claims["Status"]
+		// user.Type = claims["Type"]
+	} else {
+		fmt.Println(err)
+	}
+
+	return user, err
+}
+
+// CreateToken return a JWT
+func (r *Repository) CreateToken(u *User) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"ID":     u.ID,
+		"Name":   u.Name,
+		"Email":  u.Email,
+		"Phone":  u.Phone,
+		"Status": u.Status,
+		"Type":   u.Type,
+		"nbf":    time.Date(2015, 10, 10, 12, 0, 0, 0, time.UTC).Unix(),
+	})
+
+	// Sign and get the complete encoded token as a string using the secret
+	tokenString, err := token.SignedString(r.secretForToken)
+	return tokenString, err
 }

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strconv"
 
-	. "../../config"
 	. "../../db"
 )
 
@@ -22,9 +21,6 @@ type User struct {
 	UpdatedAt NullTime `json:"UpdatedAt"`
 	DeletedAt NullTime `json:"DeletedAt"`
 }
-
-// Repo users repository
-var Repo = Repository{tableName: Config.DB.Schema + ".users", salt: "sweet_sugar_67n334g6"}
 
 // Save entity
 func (u *User) Save() (*User, error) {
@@ -52,6 +48,7 @@ func (u *User) Delete() bool {
 func (u *User) CheckPassword(password string) bool {
 	return Repo.CreateHash(password) == u.Password
 }
+
 func parseRows(rows *sql.Rows) []User {
 	var users []User
 	for rows.Next() {
