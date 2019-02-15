@@ -13,6 +13,7 @@ import (
 type User struct {
 	ID        int      `json:"ID"`
 	Name      string   `json:"Name"`
+	Password  string   `json:"Password"`
 	Type      int      `json:"Type"`
 	Status    int      `json:"Status"`
 	Email     string   `json:"Email"`
@@ -23,7 +24,7 @@ type User struct {
 }
 
 // Repo users repository
-var Repo = Repository{tableName: Config.DB.Schema + ".users"}
+var Repo = Repository{tableName: Config.DB.Schema + ".users", salt: "sweet_sugar_67n334g6"}
 
 // Save entity
 func (u *User) Save() (*User, error) {
@@ -46,6 +47,11 @@ func (u *User) Validate() (bool, ValidateError) {
 func (u *User) Delete() bool {
 	return Repo.DeleteByID(strconv.Itoa(u.ID))
 }
+
+// CheckPassword checging password
+func (u *User) CheckPassword(password string) bool {
+	return Repo.CreateHash(password) == u.Password
+}
 func parseRows(rows *sql.Rows) []User {
 	var users []User
 	for rows.Next() {
@@ -61,6 +67,6 @@ func parseRows(rows *sql.Rows) []User {
 }
 func parseRow(row *sql.Rows) (User, error) {
 	p := User{}
-	err := row.Scan(&p.ID, &p.Type, &p.Email, &p.Phone, &p.Name, &p.CreatedAt, &p.UpdatedAt, &p.Status, &p.DeletedAt)
+	err := row.Scan(&p.ID, &p.Type, &p.Email, &p.Phone, &p.Name, &p.CreatedAt, &p.UpdatedAt, &p.Status, &p.DeletedAt, &p.Password)
 	return p, err
 }

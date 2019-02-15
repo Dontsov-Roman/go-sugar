@@ -1,6 +1,8 @@
 package users
 
 import (
+	"crypto/sha1"
+	"encoding/hex"
 	"fmt"
 	"strconv"
 
@@ -12,6 +14,7 @@ import (
 // Repository User Repository
 type Repository struct {
 	tableName string
+	salt      string
 	Context   *gin.Context
 }
 
@@ -28,8 +31,9 @@ func (r *Repository) GetAll() []User {
 
 // Create new User
 func (r *Repository) Create(user *User) (*User, error) {
-	str := `INSERT INTO ` + r.tableName + ` (type, email, phone, name, status) values(?, ?, ?, ?, ?)`
-	result, err := DB.Exec(str, user.Type, user.Email, user.Phone, user.Name, user.Status)
+	user.Password = r.CreateHash(user.Password)
+	str := `INSERT INTO ` + r.tableName + ` (type, email, phone, name, status, password) values(?, ?, ?, ?, ?, ?)`
+	result, err := DB.Exec(str, user.Type, user.Email, user.Phone, user.Name, user.Status, user.Password)
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
@@ -112,4 +116,13 @@ func (r *Repository) DeleteByID(id string) bool {
 	fmt.Println(result.LastInsertId()) // id последнего удаленого объекта
 	fmt.Println(result.RowsAffected()) // количество затронутых строк
 	return true
+}
+
+// CreateHash return a hashed string
+func (r *Repository) CreateHash(str string) string {
+	aStringToHash := []byte(str + r.salt)
+	sha1Bytes := sha1.Sum(aStringToHash)
+	encodedStr := hex.EncodeToString(sha1Bytes[:])
+	fmt.Println(str + ": " + encodedStr)
+	return encodedStr
 }
