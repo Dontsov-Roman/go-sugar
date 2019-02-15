@@ -27,53 +27,43 @@ func (r *Repository) GetAll() []OrderPrice {
 }
 
 // Create new OrderPrice
-func (r *Repository) Create(item *OrderPrice) (*OrderPrice, error) {
-	str := `INSERT INTO ` + r.tableName + ` (description, status) values(?, ?, ?)`
-	result, err := DB.Exec(str, item.Description, item.Status)
+func (r *Repository) Create(items []OrderPrice) ([]OrderPrice, error) {
+	Request := request.New(DB)
+	keys := []string{"order_id", "user_id", "price_id"}
+	var values = [][]string{}
+	for _, item := range items {
+		values = append(values, []string{strconv.Itoa(item.OrderID), strconv.Itoa(item.UserID), strconv.Itoa(item.PriceID)})
+	}
+	_, err := Request.Insert().
+		Into(r.tableName).
+		Values(keys, values).
+		Exec()
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
 	}
-	if id, insertErr := result.LastInsertId(); insertErr == nil {
-		item.ID = int(id)
-	}
-	for i := 0; i < len(item.Prices); i++ {
-		str := `INSERT INTO `
-	}
-	return item, nil
-}
-
-// Update price in DB
-func (r *Repository) Update(item *OrderPrice) (bool, error) {
-	str := `UPDATE ` + r.tableName + ` SET description = ?, status = ? WHERE id = ?`
-	_, err := DB.Exec(str, item.Description, item.Status)
-	if err != nil {
-		fmt.Println(err)
-		return false, err
-	}
-	return true, nil
+	return items, nil
 }
 
 // Validate return bool(valid or not) and ValidateError struct
 func (r *Repository) Validate(item *OrderPrice) (bool, ValidateError) {
 	valid := true
 	Request := request.New(DB)
-	id := strconv.Itoa(item.ID)
+	id := strconv.Itoa(item.OrderID)
+	priceID := strconv.Itoa(item.PriceID)
 	validateError := ValidateError{}
 	rows, err := Request.
 		Select().
 		From(r.tableName).
-		Where(request.Condition{Column: "id", Operator: "=", Value: id, ConcatOperator: "OR"}).
+		Where(request.Condition{Column: "order_id", Operator: "=", Value: id, ConcatOperator: "AND"}).
+		Where(request.Condition{Column: "price_id", Operator: "=", Value: priceID, ConcatOperator: "AND"}).
 		Query()
 	if err == nil {
 		selectedOrderPrices := parseRows(rows)
-		for i := 0; i < len(selectedOrderPrices); i++ {
-			current := selectedOrderPrices[i]
-			if current.ID == item.ID {
-				validateError.ID = "OrderPrice with this ID already exist"
-				validateError.AddToErrorMessage(validateError.ID)
-				valid = false
-			}
+		if len(selectedOrderPrices) > 0 {
+			validateError.OrderIDPriceID = "OrderPrice with this OrderID and PriceID already exist"
+			validateError.AddToErrorMessage(validateError.OrderIDPriceID)
+			valid = false
 		}
 	} else {
 		valid = false
@@ -82,13 +72,13 @@ func (r *Repository) Validate(item *OrderPrice) (bool, ValidateError) {
 	return valid, validateError
 }
 
-// DeleteByID - remove user from DB
-func (r *Repository) DeleteByID(id string) bool {
+// DeleteByOrderID - remove user from DB
+func (r *Repository) DeleteByOrderID(id string) bool {
 	Request := request.New(DB)
 	str, sqlErr := Request.
 		Delete().
 		From(r.tableName).
-		Where(request.Condition{Column: "id", Operator: "=", Value: id, ConcatOperator: "OR"}).
+		Where(request.Condition{Column: "order_id", Operator: "=", Value: id, ConcatOperator: "OR"}).
 		ToSQL()
 	if sqlErr != nil {
 		fmt.Println(sqlErr)

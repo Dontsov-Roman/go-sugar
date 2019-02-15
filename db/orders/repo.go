@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/gin-gonic/gin"
+
 	. "../../db"
 	"../../db/request"
-	"github.com/gin-gonic/gin"
+	"../ordersprices"
 )
 
 // Repository Orders
@@ -28,8 +30,9 @@ func (r *Repository) GetAll() []Order {
 
 // Create new Order
 func (r *Repository) Create(item *Order) (*Order, error) {
-	str := `INSERT INTO ` + r.tableName + ` (description, status) values(?, ?, ?)`
+	str := `INSERT INTO ` + r.tableName + ` (description, status) values(?, ?)`
 	result, err := DB.Exec(str, item.Description, item.Status)
+	var OP []ordersprices.OrderPrice
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
@@ -37,9 +40,10 @@ func (r *Repository) Create(item *Order) (*Order, error) {
 	if id, insertErr := result.LastInsertId(); insertErr == nil {
 		item.ID = int(id)
 	}
-	for i := 0; i < len(item.Prices); i++ {
-		str := `INSERT INTO `
+	for _, priceID := range item.Prices {
+		OP = append(OP, ordersprices.OrderPrice{OrderID: item.ID, UserID: item.UserID, PriceID: priceID})
 	}
+	ordersprices.Repo.Create(OP)
 	return item, nil
 }
 

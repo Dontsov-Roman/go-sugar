@@ -11,7 +11,9 @@ import (
 type Request struct {
 	tableName   string
 	join        string
-	values      map[string]string
+	keys        []string
+	values      [][]string
+	set         map[string]string
 	where       []Condition
 	requestType int // select - 1 | update - 2 | insert - 3 | delete - 4
 	orderBy     []string
@@ -69,8 +71,9 @@ func (r *Request) Select() *Request {
 }
 
 // Update === SetType(2)
-func (r *Request) Update() *Request {
+func (r *Request) Update(tableName string) *Request {
 	r.SetType(2)
+	r.tableName = tableName
 	return r
 }
 
@@ -92,6 +95,12 @@ func (r *Request) SetType(typeRequest int) *Request {
 	return r
 }
 
+// Into tableName
+func (r *Request) Into(tableName string) *Request {
+	r.tableName = tableName
+	return r
+}
+
 // From set tableName
 func (r *Request) From(tableName string) *Request {
 	r.tableName = tableName
@@ -106,12 +115,14 @@ func (r *Request) Join(join string) *Request {
 
 // Set the same as Values
 func (r *Request) Set(key string, val string) *Request {
-	return r.Values(key, val)
+	r.set[key] = val
+	return r
 }
 
 // Values add value to map[string]string
-func (r *Request) Values(key string, val string) *Request {
-	r.values[key] = val
+func (r *Request) Values(keys []string, values [][]string) *Request {
+	r.keys = keys
+	r.values = values
 	return r
 }
 
@@ -205,7 +216,7 @@ func (r *Request) ToSQL() (string, error) {
 		}
 	case 2:
 		str = "UPDATE " + r.tableName + " SET "
-		for key, val := range r.values {
+		for key, val := range r.set {
 			str = str + key + " = " + val + ", "
 		}
 		str = rCut(str, 2)
@@ -214,15 +225,12 @@ func (r *Request) ToSQL() (string, error) {
 		}
 	case 3:
 		str = "INSERT INTO " + r.tableName
-		var keys string
-		var values string
-		for key, val := range r.values {
-			keys = keys + key + ", "
-			values = values + val + ", "
+		var values []string
+		for _, val := range r.values {
+			values = append(values, "("+strings.Join(val, ",")+")")
 		}
-		keys = rCut(keys, 2)
-		values = rCut(values, 2)
-		str = str + " (" + keys + ") VALUES (" + values + ")"
+		str = str + " (" + strings.Join(r.keys, ",") + ") VALUES " + strings.Join(values, ",")
+		fmt.Println(str)
 	case 4:
 		str = "DELETE FROM " + r.tableName
 		where, err := r.parseWhere()
