@@ -2,6 +2,7 @@ package users
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
@@ -47,8 +48,9 @@ func (c CustomClaims) Valid() error {
 		vErr.Inner = fmt.Errorf("token is not valid yet")
 		vErr.Errors |= jwt.ValidationErrorNotValidYet
 	}
-	valid, validUser := c.User.Validate()
-	if valid || validUser.ID == "" {
+	// Check user in DB
+	fromDB := Repo.FindByID(strconv.Itoa(c.User.ID))
+	if fromDB == nil {
 		vErr.Inner = fmt.Errorf("User not exist in DB")
 		vErr.Errors |= jwt.ValidationErrorNotValidYet
 	}

@@ -154,3 +154,7 @@ func SaveOrder(c *gin.Context) {
 		}
 	}
 }
+
+// AuthMiddleware require auth
+func AuthMiddleware(c *gin.Context) {
+}
