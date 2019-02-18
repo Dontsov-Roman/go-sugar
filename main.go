@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+
+	"./db/users"
 	"./routeshandlers"
 	"github.com/gin-gonic/gin"
 )
@@ -15,6 +18,10 @@ type Routes struct {
 var routes = Routes{Users: "/users", Prices: "/prices", Orders: "/orders"}
 
 func main() {
+	user := users.User{ID: 49, Name: "Roman"}
+	token, err := users.Repo.CreateJWT(&user)
+	parsedUser, err := users.Repo.ParseJWT(token)
+	fmt.Println(parsedUser, err)
 	route := gin.Default()
 	route.GET(routes.Users, routeshandlers.GetAllUsers)
 	route.DELETE(routes.Users+"/:id", routeshandlers.DeleteUser)

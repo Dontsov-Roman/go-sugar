@@ -44,11 +44,10 @@ func (u *User) Delete() bool {
 	return Repo.DeleteByID(strconv.Itoa(u.ID))
 }
 
-// CheckPassword checging password
+// CheckPassword checking password
 func (u *User) CheckPassword(password string) bool {
 	return Repo.CreateHash(password) == u.Password
 }
-
 func parseRows(rows *sql.Rows) []User {
 	var users []User
 	for rows.Next() {

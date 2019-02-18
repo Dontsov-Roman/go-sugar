@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"strconv"
-	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -21,10 +20,16 @@ type Repository struct {
 	salt           string
 	secretForToken string
 	Context        *gin.Context
+	expiresAt      int64
 }
 
 // Repo users repository
-var Repo = Repository{tableName: Config.DB.Schema + ".users", salt: "sweet_sugar_67n334g6", secretForToken: "sweet_sugar_346436bb43gh463"}
+var Repo = Repository{
+	tableName:      Config.DB.Schema + ".users",
+	salt:           "sweet_sugar_67n334g6",
+	secretForToken: "sweet_sugar_346436bb43gh463",
+	expiresAt:      60 * 60,
+}
 
 // GetAll Users
 func (r *Repository) GetAll() []User {
@@ -115,15 +120,27 @@ func (r *Repository) DeleteByID(id string) bool {
 		fmt.Println(sqlErr)
 		return false
 	}
-	fmt.Println(str)
-	result, err := DB.Exec(str)
+	_, err := DB.Exec(str)
 	if err != nil {
 		fmt.Println(err)
 		return false
 	}
-	fmt.Println(result.LastInsertId()) // id последнего удаленого объекта
-	fmt.Println(result.RowsAffected()) // количество затронутых строк
 	return true
+}
+
+// FindByID - find user by ID
+func (r *Repository) FindByID(id string) *User {
+	Request := request.New(DB)
+	rows, err := Request.
+		Select().
+		From(r.tableName).
+		Where(request.Condition{Column: "id", Operator: "=", Value: id, ConcatOperator: "OR"}).
+		Query()
+	users := parseRows(rows)
+	if err != nil && len(users) > 0 {
+		return &users[0]
+	}
+	return nil
 }
 
 // CreateHash return a hashed string
@@ -135,46 +152,34 @@ func (r *Repository) CreateHash(str string) string {
 	return encodedStr
 }
 
-// ParseToken return a User
-func (r *Repository) ParseToken(tokenString string) (User, error) {
-	user := User{}
-	mapToken, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		// Don't forget to validate the alg is what you expect:
+// GetClaims return new claims with user
+func (r *Repository) GetClaims(user *User) CustomClaims {
+	claims := CustomClaims{User: user}
+	claims.ExpiresAt = jwt.TimeFunc().Unix() + Repo.expiresAt
+	return claims
+}
+
+// CreateJWT return a JWT
+func (r *Repository) CreateJWT(u *User) (string, error) {
+	claims := r.GetClaims(u)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	// Sign and get the complete encoded token as a string using the secret
+	tokenString, err := token.SignedString([]byte(r.secretForToken))
+	return tokenString, err
+}
+
+// ParseJWT return a User
+func (r *Repository) ParseJWT(tokenString string) (*User, error) {
+	claims := CustomClaims{}
+	_, err := jwt.ParseWithClaims(tokenString, &claims, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 		}
-
-		// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")
-		return r.secretForToken, nil
+		return []byte(r.secretForToken), nil
 	})
-	if claims, ok := mapToken.Claims.(jwt.MapClaims); ok && mapToken.Valid {
-		fmt.Println(claims)
-		// user.ID = claims["ID"]
-		// user.Name = claims["Name"]
-		// user.Email = claims["Email"]
-		// user.Phone = claims["Phone"]
-		// user.Status = claims["Status"]
-		// user.Type = claims["Type"]
-	} else {
-		fmt.Println(err)
+	if err != nil {
+		return nil, err
 	}
-
-	return user, err
-}
-
-// CreateToken return a JWT
-func (r *Repository) CreateToken(u *User) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"ID":     u.ID,
-		"Name":   u.Name,
-		"Email":  u.Email,
-		"Phone":  u.Phone,
-		"Status": u.Status,
-		"Type":   u.Type,
-		"nbf":    time.Date(2015, 10, 10, 12, 0, 0, 0, time.UTC).Unix(),
-	})
-
-	// Sign and get the complete encoded token as a string using the secret
-	tokenString, err := token.SignedString(r.secretForToken)
-	return tokenString, err
+	return claims.User, nil
 }

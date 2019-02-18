@@ -1,6 +1,8 @@
 package authenticate
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // Repository User Repository
 type Repository struct {
