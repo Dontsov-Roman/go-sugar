@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
 // DBConfig struct
@@ -18,8 +20,9 @@ type dBConfig struct {
 
 // ConfigStruct Main config struct
 type configStruct struct {
-	Title string
-	DB    dBConfig
+	Title    string
+	HTTPPort string
+	DB       dBConfig
 }
 
 // Config App's Configuration
@@ -42,12 +45,18 @@ func loadFromJSON() {
 	}
 }
 func loadFromEnv() {
+	err := godotenv.Load()
+	if err != nil {
+		fmt.Println("Error loading .env file")
+	}
 	Config.DB.Login = os.Getenv("MYSQL_USER")
 	Config.DB.Password = os.Getenv("MYSQL_PASSWORD")
 	Config.DB.Schema = os.Getenv("MYSQL_DATABASE")
 	Config.DB.Addr = os.Getenv("MYSQL_ADDR")
 	Config.DB.Net = os.Getenv("MYSQL_NET")
+	Config.HTTPPort = os.Getenv("HTTP_PORT")
+	fmt.Println(Config)
 }
 func init() {
-	loadFromJSON()
+	loadFromEnv()
 }

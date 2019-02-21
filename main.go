@@ -1,6 +1,7 @@
 package main
 
 import (
+	. "./config"
 	"./routeshandlers"
 	"github.com/gin-gonic/gin"
 )
@@ -40,5 +41,5 @@ func main() {
 		route.PUT(routes.Orders, routeshandlers.SaveOrder)
 	}
 
-	route.Run(":9000")
+	route.Run(":" + Config.HTTPPort)
 }
