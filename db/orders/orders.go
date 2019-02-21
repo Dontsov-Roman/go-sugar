@@ -11,14 +11,14 @@ import (
 
 // Order main struct
 type Order struct {
-	ID          int      `json:"ID"`
-	Description string   `json:"Name"`
-	Status      int      `json:"Status"`
-	UserID      int      `json:"UserID"`
-	Prices      []int    `json:"Prices"`
-	CreatedAt   NullTime `json:"CreatedAt"`
-	UpdatedAt   NullTime `json:"UpdatedAt"`
-	DeletedAt   NullTime `json:"DeletedAt"`
+	ID          int        `json:"ID"`
+	Description NullString `json:"Description"`
+	Status      int        `json:"Status"`
+	UserID      int        `json:"UserID"`
+	Prices      []int      `json:"Prices"`
+	CreatedAt   NullTime   `json:"CreatedAt"`
+	UpdatedAt   NullTime   `json:"UpdatedAt"`
+	DeletedAt   NullTime   `json:"DeletedAt"`
 }
 
 // Repo users repository
@@ -60,6 +60,6 @@ func parseRows(rows *sql.Rows) []Order {
 }
 func parseRow(row *sql.Rows) (Order, error) {
 	p := Order{}
-	err := row.Scan(&p.ID, &p.Description, &p.Status, &p.Prices, &p.CreatedAt, &p.UpdatedAt, &p.DeletedAt)
+	err := row.Scan(&p.ID, &p.Description, &p.Status, &p.CreatedAt, &p.UpdatedAt, &p.DeletedAt)
 	return p, err
 }
