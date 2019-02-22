@@ -1,7 +1,10 @@
 package main
 
 import (
+	"fmt"
+
 	. "./config"
+	"./db/users"
 	"./routeshandlers"
 	"github.com/gin-gonic/gin"
 )
@@ -16,12 +19,12 @@ type Routes struct {
 var routes = Routes{Users: "/users", Prices: "/prices", Orders: "/orders"}
 
 func main() {
-	// user := users.Repo.FindByID("50")
-	// if user != nil {
-	// 	token, err := users.Repo.CreateJWT(user)
-	// 	parsedUser, err := users.Repo.ParseJWT(token)
-	// 	fmt.Println(token, parsedUser, err)
-	// }
+	user := users.Repo.FindByID("50")
+	if user != nil {
+		token, err := users.Repo.CreateJWT(user)
+		parsedUser, err := users.Repo.ParseJWT(token)
+		fmt.Println(token, parsedUser, err)
+	}
 
 	route := gin.Default()
 	route.GET(routes.Users, routeshandlers.GetAllUsers)
@@ -33,12 +36,11 @@ func main() {
 	route.DELETE(routes.Prices+"/:id", routeshandlers.DeletePrice)
 	route.POST(routes.Prices, routeshandlers.SavePrice)
 	route.PUT(routes.Prices, routeshandlers.SavePrice)
-	route.GET(routes.Orders, routeshandlers.GetAllOrders)
 
 	authorized := route.Group(routes.Orders)
 	{
 		authorized.Use(routeshandlers.AuthMiddleware)
-
+		authorized.GET("", routeshandlers.GetAllOrders)
 		authorized.DELETE("/:id", routeshandlers.DeleteOrder)
 		authorized.POST("", routeshandlers.SaveOrder)
 		authorized.PUT("", routeshandlers.SaveOrder)

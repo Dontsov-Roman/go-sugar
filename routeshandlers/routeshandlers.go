@@ -171,6 +171,5 @@ func AuthMiddleware(c *gin.Context) {
 		Unauthorized(c)
 		return
 	}
-	fmt.Println("Passed")
 	c.Next()
 }
