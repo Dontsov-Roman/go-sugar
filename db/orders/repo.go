@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
-
+	. "../../config"
 	. "../../db"
 	"../../db/request"
 	"../ordersprices"
+	"github.com/gin-gonic/gin"
 )
 
 // Repository Orders
@@ -18,14 +18,11 @@ type Repository struct {
 	delimiter string
 }
 
+// Repo users repository
+var Repo = Repository{tableName: Config.DB.Schema + ".orders", delimiter: ","}
+
 // GetAll Orders
 func (r *Repository) GetAll() []Order {
-	// Request := request.New(DB)
-	// rows, err := Request.
-	// 	Select().
-	// 	From(r.tableName).
-	// 	Join("LEFT").
-	// 	Query()
 	str := "select *,(SELECT user_id FROM orders_prices where order_id=orders.id limit 1) as user_id, (select group_concat(price_id) from orders_prices where order_id=orders.id) as prices from " + r.tableName
 	rows, err := DB.Query(str)
 	if err != nil {
@@ -49,7 +46,7 @@ func (r *Repository) Create(item *Order) (*Order, error) {
 		item.ID = int(id)
 	}
 	for _, priceID := range StringToIntArray(item.Prices.String, r.delimiter) {
-		OP = append(OP, ordersprices.OrderPrice{OrderID: item.ID, UserID: item.UserID, PriceID: priceID})
+		OP = append(OP, ordersprices.OrderPrice{OrderID: item.ID, UserID: item.UserID, PriceID: IntToNullInt(priceID)})
 	}
 	ordersprices.Repo.Create(OP)
 	return item, nil

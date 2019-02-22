@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strconv"
 
-	. "../../config"
 	. "../../db"
 )
 
@@ -13,17 +12,13 @@ import (
 type Order struct {
 	ID          int        `json:"ID"`
 	Description NullString `json:"Description"`
-	Status      int        `json:"Status"`
-	UserID      int        `json:"UserID"`
+	Status      NullInt64  `json:"Status"`
+	UserID      NullInt64  `json:"UserID"`
 	Prices      IntArray   `json:"Prices"`
-	PricesIDS   []int      `json:"PricesIDS`
 	CreatedAt   NullTime   `json:"CreatedAt"`
 	UpdatedAt   NullTime   `json:"UpdatedAt"`
 	DeletedAt   NullTime   `json:"DeletedAt"`
 }
-
-// Repo users repository
-var Repo = Repository{tableName: Config.DB.Schema + ".orders", delimiter: ","}
 
 // Save entity
 func (item *Order) Save() (*Order, error) {

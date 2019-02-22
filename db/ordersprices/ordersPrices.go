@@ -5,13 +5,14 @@ import (
 	"fmt"
 
 	. "../../config"
+	. "../../db"
 )
 
 // OrderPrice main struct
 type OrderPrice struct {
 	OrderID int
-	UserID  int
-	PriceID int
+	UserID  NullInt64
+	PriceID NullInt64
 }
 
 // Repo entity

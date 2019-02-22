@@ -32,7 +32,8 @@ func (r *Repository) Create(items []OrderPrice) ([]OrderPrice, error) {
 	keys := []string{"order_id", "user_id", "price_id"}
 	var values = [][]string{}
 	for _, item := range items {
-		values = append(values, []string{strconv.Itoa(item.OrderID), strconv.Itoa(item.UserID), strconv.Itoa(item.PriceID)})
+		orderID := strconv.Itoa(item.OrderID)
+		values = append(values, []string{orderID, item.UserID.ToString(), item.PriceID.ToString()})
 	}
 	_, err := Request.Insert().
 		Into(r.tableName).
@@ -50,7 +51,7 @@ func (r *Repository) Validate(item *OrderPrice) (bool, ValidateError) {
 	valid := true
 	Request := request.New(DB)
 	id := strconv.Itoa(item.OrderID)
-	priceID := strconv.Itoa(item.PriceID)
+	priceID := item.PriceID.ToString()
 	validateError := ValidateError{}
 	rows, err := Request.
 		Select().
