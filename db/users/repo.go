@@ -137,7 +137,7 @@ func (r *Repository) FindByID(id string) *User {
 		Where(request.Condition{Column: "id", Operator: "=", Value: id, ConcatOperator: "OR"}).
 		Query()
 	users := parseRows(rows)
-	if err != nil && len(users) > 0 {
+	if err == nil && len(users) > 0 {
 		return &users[0]
 	}
 	return nil
@@ -148,7 +148,6 @@ func (r *Repository) CreateHash(str string) string {
 	aStringToHash := []byte(str + r.salt)
 	sha1Bytes := sha1.Sum(aStringToHash)
 	encodedStr := hex.EncodeToString(sha1Bytes[:])
-	fmt.Println(str + ": " + encodedStr)
 	return encodedStr
 }
 

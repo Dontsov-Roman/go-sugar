@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/go-sql-driver/mysql"
 )
@@ -65,14 +66,36 @@ func (ni *NullInt64) ToString() string {
 }
 
 // MarshalJSON for NullTime
-func (ni *NullTime) MarshalJSON() ([]byte, error) {
-	if !ni.Valid {
+func (nt *NullTime) MarshalJSON() ([]byte, error) {
+	if !nt.Valid {
 		return []byte("null"), nil
 	}
-	return json.Marshal(ni.Time)
+	val := fmt.Sprintf("\"%s\"", nt.Time.Format(time.RFC1123Z))
+	return []byte(val), nil
 }
 
-// MarshalJSON for NullTime
+// UnmarshalJSON for NullTime
+func (nt *NullTime) UnmarshalJSON(b []byte) error {
+	s := string(b)
+	fmt.Println(s)
+	s = strings.Trim(s, "\"")
+	fmt.Println(s)
+	if s == "null" {
+		nt.Valid = false
+		return nil
+	}
+	x, err := time.Parse(time.RFC1123Z, s)
+	if err != nil {
+		nt.Valid = false
+		return err
+	}
+
+	nt.Time = x
+	nt.Valid = true
+	return nil
+}
+
+// MarshalJSON for NullString
 func (ns *NullString) MarshalJSON() ([]byte, error) {
 	if !ns.Valid {
 		return []byte("null"), nil

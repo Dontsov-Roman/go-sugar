@@ -159,7 +159,7 @@ func SaveOrder(c *gin.Context) {
 // AuthMiddleware require auth
 func AuthMiddleware(c *gin.Context) {
 	authHeader := c.GetHeader("Authorization")
-	splitToken := strings.Split(authHeader, "Bearer")
+	splitToken := strings.Split(authHeader, "Bearer ")
 	if len(splitToken) > 1 {
 		token := splitToken[1]
 		_, err := users.Repo.ParseJWT(token)

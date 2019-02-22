@@ -31,7 +31,7 @@ func Deleted(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"msg": "deleted"})
 }
 
-// Unauthorized Unauthorized
+// Unauthorized Response with abort
 func Unauthorized(c *gin.Context) {
 	c.JSON(http.StatusUnauthorized, gin.H{"msg": "Unauthorized"})
 	c.Abort()
