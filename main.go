@@ -32,13 +32,14 @@ func main() {
 	route.POST(routes.Prices, routeshandlers.SavePrice)
 	route.PUT(routes.Prices, routeshandlers.SavePrice)
 
-	authorized := route.Group("/")
-	authorized.Use(routeshandlers.AuthMiddleware)
+	authorized := route.Group(routes.Orders)
 	{
-		route.GET(routes.Orders, routeshandlers.GetAllOrders)
-		route.DELETE(routes.Orders+"/:id", routeshandlers.DeleteOrder)
-		route.POST(routes.Orders, routeshandlers.SaveOrder)
-		route.PUT(routes.Orders, routeshandlers.SaveOrder)
+		authorized.Use(routeshandlers.AuthMiddleware)
+
+		authorized.GET("", routeshandlers.GetAllOrders)
+		authorized.DELETE("/:id", routeshandlers.DeleteOrder)
+		authorized.POST("", routeshandlers.SaveOrder)
+		authorized.PUT("", routeshandlers.SaveOrder)
 	}
 
 	route.Run(":" + Config.HTTPPort)

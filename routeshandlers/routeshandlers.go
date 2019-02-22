@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"../db/orders"
 	"../db/prices"
@@ -157,4 +158,19 @@ func SaveOrder(c *gin.Context) {
 
 // AuthMiddleware require auth
 func AuthMiddleware(c *gin.Context) {
+	authHeader := c.GetHeader("Authorization")
+	splitToken := strings.Split(authHeader, "Bearer")
+	if len(splitToken) > 1 {
+		token := splitToken[1]
+		_, err := users.Repo.ParseJWT(token)
+		if err != nil {
+			Unauthorized(c)
+			return
+		}
+	} else {
+		Unauthorized(c)
+		return
+	}
+	fmt.Println("Passed")
+	c.Next()
 }

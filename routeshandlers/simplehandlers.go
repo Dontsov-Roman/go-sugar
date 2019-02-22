@@ -30,3 +30,9 @@ func BadRequest(c *gin.Context) {
 func Deleted(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"msg": "deleted"})
 }
+
+// Unauthorized Unauthorized
+func Unauthorized(c *gin.Context) {
+	c.JSON(http.StatusUnauthorized, gin.H{"msg": "Unauthorized"})
+	c.Abort()
+}
