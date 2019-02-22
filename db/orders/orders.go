@@ -15,14 +15,15 @@ type Order struct {
 	Description NullString `json:"Description"`
 	Status      int        `json:"Status"`
 	UserID      int        `json:"UserID"`
-	Prices      []int      `json:"Prices"`
+	Prices      IntArray   `json:"Prices"`
+	PricesIDS   []int      `json:"PricesIDS`
 	CreatedAt   NullTime   `json:"CreatedAt"`
 	UpdatedAt   NullTime   `json:"UpdatedAt"`
 	DeletedAt   NullTime   `json:"DeletedAt"`
 }
 
 // Repo users repository
-var Repo = Repository{tableName: Config.DB.Schema + ".orders"}
+var Repo = Repository{tableName: Config.DB.Schema + ".orders", delimiter: ","}
 
 // Save entity
 func (item *Order) Save() (*Order, error) {
@@ -45,6 +46,7 @@ func (item *Order) Validate() (bool, ValidateError) {
 func (item *Order) Delete() bool {
 	return Repo.DeleteByID(strconv.Itoa(item.ID))
 }
+
 func parseRows(rows *sql.Rows) []Order {
 	var users []Order
 	for rows.Next() {
@@ -60,6 +62,6 @@ func parseRows(rows *sql.Rows) []Order {
 }
 func parseRow(row *sql.Rows) (Order, error) {
 	p := Order{}
-	err := row.Scan(&p.ID, &p.Description, &p.Status, &p.CreatedAt, &p.UpdatedAt, &p.DeletedAt)
+	err := row.Scan(&p.ID, &p.Description, &p.Status, &p.CreatedAt, &p.UpdatedAt, &p.DeletedAt, &p.UserID, &p.Prices)
 	return p, err
 }

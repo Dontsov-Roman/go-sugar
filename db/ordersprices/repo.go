@@ -93,3 +93,18 @@ func (r *Repository) DeleteByOrderID(id string) bool {
 	fmt.Println(result.RowsAffected()) // количество затронутых строк
 	return true
 }
+
+// GetByOrderID - get all by IrderID from DB
+func (r *Repository) GetByOrderID(id string) []OrderPrice {
+	Request := request.New(DB)
+	rows, err := Request.
+		Select().
+		From(r.tableName).
+		Where(request.Condition{Column: "order_id", Operator: "=", Value: id, ConcatOperator: "OR"}).
+		Query()
+	if err != nil {
+		fmt.Println(err)
+		return []OrderPrice{}
+	}
+	return parseRows(rows)
+}

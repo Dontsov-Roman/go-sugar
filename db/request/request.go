@@ -204,7 +204,9 @@ func (r *Request) ToSQL() (string, error) {
 		if where, err := r.parseWhere(); err == nil {
 			str = str + where
 		}
-
+		if len(r.join) > 0 {
+			str += r.join
+		}
 		if r.limit != 0 {
 			str = str + " LIMIT " + string(r.limit)
 			if r.offset != 0 {

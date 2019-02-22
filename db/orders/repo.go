@@ -15,17 +15,25 @@ import (
 type Repository struct {
 	tableName string
 	Context   *gin.Context
+	delimiter string
 }
 
 // GetAll Orders
 func (r *Repository) GetAll() []Order {
-	Request := request.New(DB)
-	rows, err := Request.Select().From(r.tableName).Query()
+	// Request := request.New(DB)
+	// rows, err := Request.
+	// 	Select().
+	// 	From(r.tableName).
+	// 	Join("LEFT").
+	// 	Query()
+	str := "select *,(SELECT user_id FROM orders_prices where order_id=orders.id limit 1) as user_id, (select group_concat(price_id) from orders_prices where order_id=orders.id) as prices from " + r.tableName
+	rows, err := DB.Query(str)
 	if err != nil {
 		fmt.Println(err)
 		return []Order{}
 	}
-	return parseRows(rows)
+	orders := parseRows(rows)
+	return orders
 }
 
 // Create new Order
@@ -40,7 +48,7 @@ func (r *Repository) Create(item *Order) (*Order, error) {
 	if id, insertErr := result.LastInsertId(); insertErr == nil {
 		item.ID = int(id)
 	}
-	for _, priceID := range item.Prices {
+	for _, priceID := range StringToIntArray(item.Prices.String, r.delimiter) {
 		OP = append(OP, ordersprices.OrderPrice{OrderID: item.ID, UserID: item.UserID, PriceID: priceID})
 	}
 	ordersprices.Repo.Create(OP)
