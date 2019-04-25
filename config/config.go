@@ -15,7 +15,7 @@ type dBConfig struct {
 	Password string
 	Schema   string
 	Addr     string
-	Net      string
+	Net      string // tcp
 }
 
 // ConfigStruct Main config struct
