@@ -12,6 +12,7 @@ import (
 type Order struct {
 	ID          int        `json:"ID"`
 	Description NullString `json:"Description"`
+	Time        NullTime   `json:"Time"`
 	Status      NullInt64  `json:"Status"`
 	UserID      NullInt64  `json:"UserID"`
 	Prices      IntArray   `json:"Prices"`
