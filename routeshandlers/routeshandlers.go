@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"../db/authenticate"
 	"../db/orders"
 	"../db/prices"
 	"../db/users"
@@ -157,8 +158,19 @@ func SaveOrder(c *gin.Context) {
 	}
 }
 
+// GetTokenByDeviceID handler
+func GetTokenByDeviceID(c *gin.Context) {
+	auth, err := authenticate.GetByDeviceID(c.Param("id"))
+	if err != nil {
+		fmt.Println(err.Error())
+		c.JSON(http.StatusNotFound, gin.H{"msg": err.Error()})
+	} else {
+		c.JSON(http.StatusOK, gin.H{"token": auth.Token})
+	}
+}
+
 // GetUser by gin.context, parsing Authorization Header;
-func GetUser(c *gin.Context) (*users.User, error) {
+func getUser(c *gin.Context) (*users.User, error) {
 	authHeader := c.GetHeader("Authorization")
 	splitToken := strings.Split(authHeader, "Bearer ")
 	if len(splitToken) > 1 {
@@ -171,7 +183,7 @@ func GetUser(c *gin.Context) (*users.User, error) {
 
 // AuthMiddleware require auth
 func AuthMiddleware(c *gin.Context) {
-	user, err := GetUser(c)
+	user, err := getUser(c)
 	fmt.Println(user)
 	if err != nil {
 		Unauthorized(c)

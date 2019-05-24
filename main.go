@@ -27,6 +27,7 @@ func main() {
 	}
 
 	route := gin.Default()
+	route.GET(routes.Users+"/get-token-by-device-id/:id", routeshandlers.GetTokenByDeviceID)
 	route.GET(routes.Users, routeshandlers.GetAllUsers)
 	route.DELETE(routes.Users+"/:id", routeshandlers.DeleteUser)
 	route.POST(routes.Users, routeshandlers.SaveUser)

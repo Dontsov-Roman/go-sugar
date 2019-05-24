@@ -12,3 +12,8 @@ type Auth struct {
 	CreatedAt NullTime `json:"CreatedAt"`
 	UpdatedAt NullTime `json:"UpdatedAt"`
 }
+
+// GetByDeviceID delegate to Repository
+func GetByDeviceID(id string) (*Auth, error) {
+	return Repo.GetByDeviceID(id)
+}
