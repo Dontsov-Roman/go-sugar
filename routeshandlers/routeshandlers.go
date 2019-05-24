@@ -1,6 +1,7 @@
 package routeshandlers
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -156,18 +157,23 @@ func SaveOrder(c *gin.Context) {
 	}
 }
 
-// AuthMiddleware require auth
-func AuthMiddleware(c *gin.Context) {
+// GetUser by gin.context, parsing Authorization Header;
+func GetUser(c *gin.Context) (*users.User, error) {
 	authHeader := c.GetHeader("Authorization")
 	splitToken := strings.Split(authHeader, "Bearer ")
 	if len(splitToken) > 1 {
 		token := splitToken[1]
-		_, err := users.Repo.ParseJWT(token)
-		if err != nil {
-			Unauthorized(c)
-			return
-		}
+		return users.Repo.ParseJWT(token)
 	} else {
+		return nil, errors.New("No token")
+	}
+}
+
+// AuthMiddleware require auth
+func AuthMiddleware(c *gin.Context) {
+	user, err := GetUser(c)
+	fmt.Println(user)
+	if err != nil {
 		Unauthorized(c)
 		return
 	}

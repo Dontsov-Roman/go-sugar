@@ -10,12 +10,12 @@ type Repository struct {
 }
 
 // Repo repository
-var Repo = Repository{tableName: "authenticate"}
+var Repo = Repository{tableName: "auth_session"}
 
 // Create new User
 func (r *Repository) Create(auth *Auth) (*Auth, error) {
-	str := `INSERT INTO ` + r.tableName + ` (user_id, email, phone, name, status, password) values(?, ?, ?, ?, ?, ?)`
-	result, err := DB.Exec(str, user.Type, user.Email, user.Phone, user.Name, user.Status, user.Password)
+	str := `INSERT INTO ` + r.tableName + ` (user_id, device_id, token) values(?, ?, ?)`
+	result, err := DB.Exec(str, Auth.UserID, Auth.DeviceID, Auth.Token)
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
