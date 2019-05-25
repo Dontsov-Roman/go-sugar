@@ -158,6 +158,43 @@ func SaveOrder(c *gin.Context) {
 	}
 }
 
+// RegistrateByEmail handler
+func RegistrateByEmail(c *gin.Context) {
+	registrateByEmail := users.RegistrateByEmailUser{}
+	item := users.User{ID: registrateByEmail.ID, Name: registrateByEmail.Name, Email: registrateByEmail.Email, Phone: registrateByEmail.Phone}
+	if err := c.ShouldBindJSON(&item); err != nil {
+		fmt.Println(err)
+		c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
+		return
+	} else {
+		if savedItem, err := item.Save(); err == nil {
+			token, err := users.Repo.CreateJWT(savedItem)
+			fmt.Println(len(token))
+			if err != nil {
+				fmt.Println(err.Error())
+				c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
+				return
+			}
+			auth := authenticate.Auth{UserID: savedItem.ID, DeviceID: registrateByEmail.DeviceID, Token: token}
+			if _, authErr := auth.Save(); authErr != nil {
+				fmt.Println(authErr.Error())
+				c.JSON(http.StatusBadRequest, gin.H{"msg": authErr.Error()})
+				return
+			}
+			c.JSON(http.StatusOK, gin.H{"data": savedItem, "token": auth.Token})
+		} else {
+			ok, validateError := item.Validate()
+			if ok {
+				c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
+				return
+			} else {
+				c.JSON(http.StatusBadRequest, gin.H{"msg": validateError.ErrorMessage, "data": validateError})
+				return
+			}
+		}
+	}
+}
+
 // GetTokenByDeviceID handler
 func GetTokenByDeviceID(c *gin.Context) {
 	auth, err := authenticate.GetByDeviceID(c.Param("id"))
@@ -176,15 +213,15 @@ func getUser(c *gin.Context) (*users.User, error) {
 	if len(splitToken) > 1 {
 		token := splitToken[1]
 		return users.Repo.ParseJWT(token)
-	} else {
-		return nil, errors.New("No token")
 	}
+	return nil, errors.New("No token")
+
 }
 
 // AuthMiddleware require auth
 func AuthMiddleware(c *gin.Context) {
 	user, err := getUser(c)
-	fmt.Println(user)
+	fmt.Println(user, err.Error())
 	if err != nil {
 		Unauthorized(c)
 		return

@@ -1,10 +1,7 @@
 package main
 
 import (
-	"fmt"
-
 	. "./config"
-	"./db/users"
 	"./routeshandlers"
 	"github.com/gin-gonic/gin"
 )
@@ -19,32 +16,37 @@ type Routes struct {
 var routes = Routes{Users: "/users", Prices: "/prices", Orders: "/orders"}
 
 func main() {
-	user := users.Repo.FindByID("50")
-	if user != nil {
-		token, err := users.Repo.CreateJWT(user)
-		parsedUser, err := users.Repo.ParseJWT(token)
-		fmt.Println(token, parsedUser, err)
+	route := gin.Default()
+	// users
+	route.GET(routes.Users+"/get-token-by-device-id/:id", routeshandlers.GetTokenByDeviceID)
+	route.POST(routes.Users+"/registrate-by-email", routeshandlers.RegistrateByEmail)
+	authorizedUsers := route.Group(routes.Users)
+	{
+		authorizedUsers.Use(routeshandlers.AuthMiddleware)
+		authorizedUsers.GET("", routeshandlers.GetAllUsers)
+		authorizedUsers.DELETE("/:id", routeshandlers.DeleteUser)
+		authorizedUsers.POST("", routeshandlers.SaveUser)
+		authorizedUsers.PUT("", routeshandlers.SaveUser)
 	}
 
-	route := gin.Default()
-	route.GET(routes.Users+"/get-token-by-device-id/:id", routeshandlers.GetTokenByDeviceID)
-	route.GET(routes.Users, routeshandlers.GetAllUsers)
-	route.DELETE(routes.Users+"/:id", routeshandlers.DeleteUser)
-	route.POST(routes.Users, routeshandlers.SaveUser)
-	route.PUT(routes.Users, routeshandlers.SaveUser)
-
+	// Prices
 	route.GET(routes.Prices, routeshandlers.GetAllPrices)
-	route.DELETE(routes.Prices+"/:id", routeshandlers.DeletePrice)
-	route.POST(routes.Prices, routeshandlers.SavePrice)
-	route.PUT(routes.Prices, routeshandlers.SavePrice)
-
-	authorized := route.Group(routes.Orders)
+	authorizedPrices := route.Group(routes.Prices)
 	{
-		authorized.Use(routeshandlers.AuthMiddleware)
-		authorized.GET("", routeshandlers.GetAllOrders)
-		authorized.DELETE("/:id", routeshandlers.DeleteOrder)
-		authorized.POST("", routeshandlers.SaveOrder)
-		authorized.PUT("", routeshandlers.SaveOrder)
+		authorizedPrices.Use(routeshandlers.AuthMiddleware)
+		authorizedPrices.DELETE("/:id", routeshandlers.DeletePrice)
+		authorizedPrices.POST("", routeshandlers.SavePrice)
+		authorizedPrices.PUT("", routeshandlers.SavePrice)
+	}
+
+	// Authorized
+	authorizedOrders := route.Group(routes.Orders)
+	{
+		authorizedOrders.Use(routeshandlers.AuthMiddleware)
+		authorizedOrders.GET("", routeshandlers.GetAllOrders)
+		authorizedOrders.DELETE("/:id", routeshandlers.DeleteOrder)
+		authorizedOrders.POST("", routeshandlers.SaveOrder)
+		authorizedOrders.PUT("", routeshandlers.SaveOrder)
 	}
 
 	route.Run(":" + Config.HTTPPort)

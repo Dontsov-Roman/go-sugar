@@ -8,7 +8,7 @@ import (
 	. "../../db"
 )
 
-//User main struct
+// User main struct
 type User struct {
 	ID        int      `json:"ID"`
 	Name      string   `json:"Name"`
@@ -20,6 +20,16 @@ type User struct {
 	CreatedAt NullTime `json:"CreatedAt"`
 	UpdatedAt NullTime `json:"UpdatedAt"`
 	DeletedAt NullTime `json:"DeletedAt"`
+}
+
+// RegistrateByEmailUser get by first registrate via email
+type RegistrateByEmailUser struct {
+	ID       int    `json:"ID"`
+	Name     string `json:"Name"`
+	Status   int    `json:"Status"`
+	Email    string `json:"Email"`
+	Phone    string `json:"Phone"`
+	DeviceID string `json:"DeviceID"`
 }
 
 // Save entity

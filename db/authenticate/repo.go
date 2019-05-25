@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strconv"
 
 	. "../../db"
 	"../../db/request"
@@ -16,6 +17,20 @@ type Repository struct {
 
 // Repo repository
 var Repo = Repository{tableName: "auth_session"}
+
+// DeleteByUserID - remove previous all user's session
+func (r *Repository) DeleteByUserID(UserID int) (bool, error) {
+	Request := request.New(DB)
+	_, err := Request.
+		Delete().
+		From(r.tableName).
+		Where(request.Condition{Column: "user_id", Operator: "=", Value: strconv.Itoa(UserID)}).
+		Exec()
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
 
 // Create new auth session
 func (r *Repository) Create(auth *Auth) (*Auth, error) {

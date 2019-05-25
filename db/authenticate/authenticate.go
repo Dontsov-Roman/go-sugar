@@ -17,3 +17,12 @@ type Auth struct {
 func GetByDeviceID(id string) (*Auth, error) {
 	return Repo.GetByDeviceID(id)
 }
+
+// Save - create new AUTH session
+func (a *Auth) Save() (*Auth, error) {
+	_, err := Repo.DeleteByUserID(a.UserID)
+	if err != nil {
+		return nil, err
+	}
+	return Repo.Create(a)
+}
