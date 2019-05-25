@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"strconv"
 
-	. "../../db"
-	"../../db/request"
+	. "go-sugar/db"
+	"go-sugar/db/request"
+
 	"github.com/gin-gonic/gin"
 )
 

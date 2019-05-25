@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strconv"
 
-	. "../../config"
-	. "../../db"
+	. "go-sugar/config"
+	. "go-sugar/db"
 )
 
 //Price main struct

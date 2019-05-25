@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 
-	. "../../config"
-	. "../../db"
+	. "go-sugar/config"
+	. "go-sugar/db"
 )
 
 // OrderPrice main struct

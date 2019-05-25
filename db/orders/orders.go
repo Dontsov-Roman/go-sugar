@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
-	. "../../db"
+	. "go-sugar/db"
 )
 
 // Order main struct

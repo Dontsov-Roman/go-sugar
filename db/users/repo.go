@@ -9,9 +9,10 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 
-	. "../../config"
-	. "../../db"
-	"../../db/request"
+	. "go-sugar/config"
+
+	. "go-sugar/db"
+	"go-sugar/db/request"
 )
 
 // Repository User Repository

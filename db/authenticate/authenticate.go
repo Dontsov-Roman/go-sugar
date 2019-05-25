@@ -1,7 +1,7 @@
 package authenticate
 
 import (
-	. "../../db"
+	. "go-sugar/db"
 )
 
 // Auth struct

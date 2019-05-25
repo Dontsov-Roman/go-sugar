@@ -7,10 +7,11 @@ import (
 	"strconv"
 	"strings"
 
-	"../db/authenticate"
-	"../db/orders"
-	"../db/prices"
-	"../db/users"
+	"go-sugar/db/authenticate"
+	"go-sugar/db/orders"
+	"go-sugar/db/prices"
+	"go-sugar/db/users"
+
 	"github.com/gin-gonic/gin"
 )
 

@@ -4,7 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 
-	. "../config"
+	. "go-sugar/config"
+
 	"github.com/go-sql-driver/mysql"
 )
 

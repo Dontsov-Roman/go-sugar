@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"strconv"
 
-	. "../../config"
-	. "../../db"
-	"../../db/request"
-	"../ordersprices"
+	. "go-sugar/config"
+	. "go-sugar/db"
+	"go-sugar/db/ordersprices"
+	"go-sugar/db/request"
+
 	"github.com/gin-gonic/gin"
 )
 
