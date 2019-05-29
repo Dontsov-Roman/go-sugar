@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"go-sugar/db/authenticate"
+	"go-sugar/db/authsession"
 	"go-sugar/db/orders"
 	"go-sugar/db/prices"
 	"go-sugar/db/users"
@@ -176,7 +176,7 @@ func RegistrateByEmail(c *gin.Context) {
 				c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
 				return
 			}
-			auth := authenticate.Auth{UserID: savedItem.ID, DeviceID: registrateByEmail.DeviceID, Token: token}
+			auth := authsession.Auth{UserID: savedItem.ID, DeviceID: registrateByEmail.DeviceID, Token: token}
 			if _, authErr := auth.Save(); authErr != nil {
 				fmt.Println(authErr.Error())
 				c.JSON(http.StatusBadRequest, gin.H{"msg": authErr.Error()})
@@ -198,12 +198,38 @@ func RegistrateByEmail(c *gin.Context) {
 
 // GetTokenByDeviceID handler
 func GetTokenByDeviceID(c *gin.Context) {
-	auth, err := authenticate.GetByDeviceID(c.Param("id"))
+	auth, err := authsession.GetByDeviceID(c.Param("id"))
 	if err != nil {
 		fmt.Println(err.Error())
 		c.JSON(http.StatusNotFound, gin.H{"msg": err.Error()})
 	} else {
 		c.JSON(http.StatusOK, gin.H{"token": auth.Token})
+	}
+}
+
+// AuthByEmail and password
+func AuthByEmail(c *gin.Context) {
+	creds := users.AuthByEmail{}
+	if err := c.ShouldBindJSON(&creds); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
+		return
+	}
+	user, err := users.Repo.FindByEmail(creds.Email)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"msg": err.Error()})
+		return
+	}
+	if user.CheckPassword(creds.Password) {
+		token, err := users.Repo.CreateJWT(user)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
+			return
+		}
+		auth := authsession.Auth{UserID: user.ID, DeviceID: creds.DeviceID, Token: token}
+		auth.Save()
+		c.JSON(http.StatusOK, gin.H{"data": user, "token": token})
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"msg": "Wrong password"})
 	}
 }
 

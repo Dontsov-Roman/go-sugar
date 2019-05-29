@@ -32,6 +32,13 @@ type RegistrateByEmailUser struct {
 	DeviceID string `json:"DeviceID"`
 }
 
+// AuthByEmail - get user by phone and password
+type AuthByEmail struct {
+	Email    string `json:"Email"`
+	Password string `json:"Password"`
+	DeviceID string `json:"DeviceID"`
+}
+
 // Save entity
 func (u *User) Save() (*User, error) {
 	if u.ID != 0 {

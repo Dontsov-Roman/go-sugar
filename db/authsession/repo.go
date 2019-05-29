@@ -1,4 +1,4 @@
-package authenticate
+package authsession
 
 import (
 	"database/sql"
@@ -37,7 +37,6 @@ func (r *Repository) Create(auth *Auth) (*Auth, error) {
 	str := `INSERT INTO ` + r.tableName + ` (user_id, device_id, token) values(?, ?, ?)`
 	_, err := DB.Exec(str, auth.UserID, auth.DeviceID, auth.Token)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 	return auth, nil
@@ -51,7 +50,6 @@ func (r *Repository) GetByDeviceID(DeviceID string) (*Auth, error) {
 		From(r.tableName).
 		Where(request.Condition{Column: "device_id", Operator: "=", Value: DeviceID, ConcatOperator: "OR"}).
 		ToSQL()
-	fmt.Println(sql)
 	rows, err := DB.Query(sql)
 	if err != nil {
 		return nil, err

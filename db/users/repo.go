@@ -3,6 +3,7 @@ package users
 import (
 	"crypto/sha1"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"strconv"
 
@@ -29,7 +30,7 @@ var Repo = Repository{
 	tableName:      Config.DB.Schema + ".users",
 	salt:           "sweet_sugar_67n334g6",
 	secretForToken: "sweet_sugar_346436bb43gh463",
-	expiresAt:      60 * 60,
+	expiresAt:      60 * 60 * 24,
 }
 
 // GetAll Users
@@ -37,7 +38,6 @@ func (r *Repository) GetAll() []User {
 	Request := request.New(DB)
 	rows, err := Request.Select().From(r.tableName).Query()
 	if err != nil {
-		fmt.Println(err)
 		return []User{}
 	}
 	return parseRows(rows)
@@ -49,7 +49,6 @@ func (r *Repository) Create(user *User) (*User, error) {
 	str := `INSERT INTO ` + r.tableName + ` (type, email, phone, name, status, password) values(?, ?, ?, ?, ?, ?)`
 	result, err := DB.Exec(str, user.Type, user.Email, user.Phone, user.Name, user.Status, user.Password)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 	if id, insertErr := result.LastInsertId(); insertErr == nil {
@@ -103,7 +102,6 @@ func (r *Repository) Update(user *User) (bool, error) {
 	str := `UPDATE ` + r.tableName + ` SET name = ?, type = ?, status = ?, email = ?, phone = ? WHERE id = ?`
 	_, err := DB.Exec(str, user.Name, user.Type, user.Status, user.Email, user.Phone, user.ID)
 	if err != nil {
-		fmt.Println(err)
 		return false, err
 	}
 	return true, nil
@@ -118,30 +116,47 @@ func (r *Repository) DeleteByID(id string) bool {
 		Where(request.Condition{Column: "id", Operator: "=", Value: id, ConcatOperator: "OR"}).
 		ToSQL()
 	if sqlErr != nil {
-		fmt.Println(sqlErr)
 		return false
 	}
 	_, err := DB.Exec(str)
 	if err != nil {
-		fmt.Println(err)
 		return false
 	}
 	return true
 }
 
 // FindByID - find user by ID
-func (r *Repository) FindByID(id string) *User {
+func (r *Repository) FindByID(id string) (*User, error) {
 	Request := request.New(DB)
 	rows, err := Request.
 		Select().
 		From(r.tableName).
 		Where(request.Condition{Column: "id", Operator: "=", Value: id, ConcatOperator: "OR"}).
 		Query()
-	users := parseRows(rows)
-	if err == nil && len(users) > 0 {
-		return &users[0]
+	if err == nil {
+		users := parseRows(rows)
+		if len(users) > 0 {
+			return &users[0], nil
+		}
 	}
-	return nil
+	return nil, errors.New("User not found")
+}
+
+// FindByEmail - find user by ID
+func (r *Repository) FindByEmail(email string) (*User, error) {
+	Request := request.New(DB)
+	rows, err := Request.
+		Select().
+		From(r.tableName).
+		Where(request.Condition{Column: "email", Operator: "=", Value: email, ConcatOperator: "OR"}).
+		Query()
+	if err == nil {
+		users := parseRows(rows)
+		if len(users) > 0 {
+			return &users[0], nil
+		}
+	}
+	return nil, errors.New("User not found")
 }
 
 // CreateHash return a hashed string

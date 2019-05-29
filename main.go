@@ -22,6 +22,7 @@ func main() {
 	// users
 	route.GET(routes.Users+"/get-token-by-device-id/:id", routeshandlers.GetTokenByDeviceID)
 	route.POST(routes.Users+"/registrate-by-email", routeshandlers.RegistrateByEmail)
+	route.POST(routes.Users+"/auth-by-email", routeshandlers.AuthByEmail)
 	authorizedUsers := route.Group(routes.Users)
 	{
 		authorizedUsers.Use(routeshandlers.AuthMiddleware)

@@ -148,7 +148,7 @@ func (r *Request) parseWhere() (string, error) {
 	if length > 0 {
 		for i := 0; i < length; i++ {
 			fmt.Println(length, i)
-			str = str + r.where[i].Column + r.where[i].Operator + r.where[i].Value
+			str = str + r.where[i].Column + r.where[i].Operator + "\"" + r.where[i].Value + "\""
 			if i+1 < length {
 				str = str + " " + r.where[i].ConcatOperator + " "
 			}

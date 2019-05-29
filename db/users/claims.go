@@ -49,9 +49,9 @@ func (c CustomClaims) Valid() error {
 		vErr.Errors |= jwt.ValidationErrorNotValidYet
 	}
 	// Check user in DB
-	fromDB := Repo.FindByID(strconv.Itoa(c.User.ID))
-	if fromDB == nil {
-		vErr.Inner = fmt.Errorf("User not exist in DB")
+	_, err := Repo.FindByID(strconv.Itoa(c.User.ID))
+	if err != nil {
+		vErr.Inner = fmt.Errorf(err.Error())
 		vErr.Errors |= jwt.ValidationErrorNotValidYet
 	}
 	if vErr.valid() {

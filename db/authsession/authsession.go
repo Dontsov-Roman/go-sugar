@@ -1,4 +1,4 @@
-package authenticate
+package authsession
 
 import (
 	. "go-sugar/db"
