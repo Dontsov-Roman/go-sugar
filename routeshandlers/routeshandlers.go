@@ -141,7 +141,7 @@ func SaveOrder(c *gin.Context) {
 		fmt.Println("shouldBindJSON", err)
 		c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
 	} else {
-		var id int = item.ID
+		id := item.ID
 		if savedItem, err := item.Save(); err == nil {
 			if id == 0 {
 				Created(c, savedItem)
@@ -162,38 +162,37 @@ func SaveOrder(c *gin.Context) {
 // RegistrateByEmail handler
 func RegistrateByEmail(c *gin.Context) {
 	registrateByEmail := users.RegistrateByEmailUser{}
-	item := users.User{ID: registrateByEmail.ID, Name: registrateByEmail.Name, Email: registrateByEmail.Email, Phone: registrateByEmail.Phone}
-	if err := c.ShouldBindJSON(&item); err != nil {
+	newUser := users.User{ID: registrateByEmail.ID, Name: registrateByEmail.Name, Email: registrateByEmail.Email, Phone: registrateByEmail.Phone}
+	if err := c.ShouldBindJSON(&newUser); err != nil {
 		fmt.Println(err)
 		c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
 		return
-	} else {
-		if savedItem, err := item.Save(); err == nil {
-			token, err := users.Repo.CreateJWT(savedItem)
-			fmt.Println(len(token))
-			if err != nil {
-				fmt.Println(err.Error())
-				c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
-				return
-			}
-			auth := authsession.Auth{UserID: savedItem.ID, DeviceID: registrateByEmail.DeviceID, Token: token}
-			if _, authErr := auth.Save(); authErr != nil {
-				fmt.Println(authErr.Error())
-				c.JSON(http.StatusBadRequest, gin.H{"msg": authErr.Error()})
-				return
-			}
-			c.JSON(http.StatusOK, gin.H{"data": savedItem, "token": auth.Token})
-		} else {
-			ok, validateError := item.Validate()
-			if ok {
-				c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
-				return
-			} else {
-				c.JSON(http.StatusBadRequest, gin.H{"msg": validateError.ErrorMessage, "data": validateError})
-				return
-			}
-		}
 	}
+	savedItem, err := newUser.Save()
+	if err == nil {
+		token, err := users.Repo.CreateJWT(savedItem)
+		fmt.Println(len(token))
+		if err != nil {
+			fmt.Println(err.Error())
+			c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
+			return
+		}
+		auth := authsession.Auth{UserID: savedItem.ID, DeviceID: registrateByEmail.DeviceID, Token: token}
+		if _, authErr := auth.Save(); authErr != nil {
+			fmt.Println(authErr.Error())
+			c.JSON(http.StatusBadRequest, gin.H{"msg": authErr.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"data": savedItem, "token": auth.Token})
+		return
+	}
+	ok, validateError := newUser.Validate()
+	fmt.Println(validateError.ErrorMessage)
+	if ok {
+		c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
+		return
+	}
+	c.JSON(http.StatusBadRequest, gin.H{"msg": validateError.ErrorMessage, "data": validateError})
 }
 
 // GetTokenByDeviceID handler
