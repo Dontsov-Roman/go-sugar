@@ -93,7 +93,7 @@ func SavePrice(c *gin.Context) {
 		fmt.Println(err)
 		c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
 	} else {
-		var id int = item.ID
+		id := item.ID
 		if savedItem, err := item.Save(); err == nil {
 			if id == 0 {
 				Created(c, savedItem)
@@ -162,10 +162,16 @@ func SaveOrder(c *gin.Context) {
 // RegistrateByEmail handler
 func RegistrateByEmail(c *gin.Context) {
 	registrateByEmail := users.RegistrateByEmailUser{}
-	newUser := users.User{ID: registrateByEmail.ID, Name: registrateByEmail.Name, Email: registrateByEmail.Email, Phone: registrateByEmail.Phone}
-	if err := c.ShouldBindJSON(&newUser); err != nil {
+	if err := c.ShouldBindJSON(&registrateByEmail); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
 		return
+	}
+	newUser := users.User{
+		ID: registrateByEmail.ID,
+		Name: registrateByEmail.Name,
+		Email: registrateByEmail.Email,
+		Phone: registrateByEmail.Phone,
+		Password: registrateByEmail.Password
 	}
 	savedItem, err := newUser.Save()
 	if err == nil {

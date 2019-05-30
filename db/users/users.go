@@ -28,6 +28,7 @@ type RegistrateByEmailUser struct {
 	Name     string `json:"Name"`
 	Status   int    `json:"Status"`
 	Email    string `json:"Email"`
+	Password string `json:"Password"`
 	Phone    string `json:"Phone"`
 	DeviceID string `json:"DeviceID"`
 }
