@@ -164,7 +164,6 @@ func RegistrateByEmail(c *gin.Context) {
 	registrateByEmail := users.RegistrateByEmailUser{}
 	newUser := users.User{ID: registrateByEmail.ID, Name: registrateByEmail.Name, Email: registrateByEmail.Email, Phone: registrateByEmail.Phone}
 	if err := c.ShouldBindJSON(&newUser); err != nil {
-		fmt.Println(err)
 		c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
 		return
 	}
@@ -173,13 +172,11 @@ func RegistrateByEmail(c *gin.Context) {
 		token, err := users.Repo.CreateJWT(savedItem)
 		fmt.Println(len(token))
 		if err != nil {
-			fmt.Println(err.Error())
 			c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
 			return
 		}
 		auth := authsession.Auth{UserID: savedItem.ID, DeviceID: registrateByEmail.DeviceID, Token: token}
 		if _, authErr := auth.Save(); authErr != nil {
-			fmt.Println(authErr.Error())
 			c.JSON(http.StatusBadRequest, gin.H{"msg": authErr.Error()})
 			return
 		}
@@ -187,7 +184,6 @@ func RegistrateByEmail(c *gin.Context) {
 		return
 	}
 	ok, validateError := newUser.Validate()
-	fmt.Println(validateError.ErrorMessage)
 	if ok {
 		c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
 		return
