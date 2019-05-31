@@ -167,11 +167,11 @@ func RegistrateByEmail(c *gin.Context) {
 		return
 	}
 	newUser := users.User{
-		ID: registrateByEmail.ID,
-		Name: registrateByEmail.Name,
-		Email: registrateByEmail.Email,
-		Phone: registrateByEmail.Phone,
-		Password: registrateByEmail.Password
+		ID:       registrateByEmail.ID,
+		Name:     registrateByEmail.Name,
+		Email:    registrateByEmail.Email,
+		Phone:    registrateByEmail.Phone,
+		Password: registrateByEmail.Password,
 	}
 	savedItem, err := newUser.Save()
 	if err == nil {
@@ -248,8 +248,7 @@ func getUser(c *gin.Context) (*users.User, error) {
 
 // AuthMiddleware require auth
 func AuthMiddleware(c *gin.Context) {
-	user, err := getUser(c)
-	fmt.Println(user, err.Error())
+	_, err := getUser(c)
 	if err != nil {
 		Unauthorized(c)
 		return
