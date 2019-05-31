@@ -36,8 +36,8 @@ func (r *Repository) GetAll() []Order {
 
 // Create new Order
 func (r *Repository) Create(item *Order) (*Order, error) {
-	str := `INSERT INTO ` + r.tableName + ` (description, status, time) values(?, ?, ?)`
-	result, err := DB.Exec(str, item.Description, item.Status, item.Time)
+	str := `INSERT INTO ` + r.tableName + ` (user_id, description, status, time) values(?, ?, ?, ?)`
+	result, err := DB.Exec(str, item.UserID, item.Description, item.Status, item.Time)
 	var OP []ordersprices.OrderPrice
 	if err != nil {
 		fmt.Println(err)

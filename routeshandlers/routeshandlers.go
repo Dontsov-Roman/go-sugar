@@ -3,6 +3,7 @@ package routeshandlers
 import (
 	"errors"
 	"fmt"
+	"go-sugar/db"
 	"net/http"
 	"strconv"
 	"strings"
@@ -45,7 +46,7 @@ func SaveUser(c *gin.Context) {
 		fmt.Println(err)
 		c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
 	} else {
-		var id int = item.ID
+		id := item.ID
 		if savedItem, err := item.Save(); err == nil {
 			if id == 0 {
 				Created(c, savedItem)
@@ -136,27 +137,32 @@ func DeleteOrder(c *gin.Context) {
 // SaveOrder with ShouldBindJSON
 func SaveOrder(c *gin.Context) {
 	item := orders.Order{}
-
-	if err := c.ShouldBindJSON(&item); err != nil {
-		fmt.Println("shouldBindJSON", err)
-		c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
-	} else {
-		id := item.ID
-		if savedItem, err := item.Save(); err == nil {
-			if id == 0 {
-				Created(c, savedItem)
-			} else {
-				Saved(c)
-			}
+	if user, err := getUser(c); err == nil {
+		if err := c.ShouldBindJSON(&item); err != nil {
+			fmt.Println("shouldBindJSON", err)
+			c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
 		} else {
-			ok, validateError := item.Validate()
-			if ok {
-				c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
+			id := item.ID
+			item.UserID = db.IntToNullInt(user.ID)
+			if savedItem, err := item.Save(); err == nil {
+				if id == 0 {
+					Created(c, savedItem)
+				} else {
+					Saved(c)
+				}
 			} else {
-				c.JSON(http.StatusBadRequest, gin.H{"msg": validateError.ErrorMessage, "data": validateError})
+				ok, validateError := item.Validate()
+				if ok {
+					c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
+				} else {
+					c.JSON(http.StatusBadRequest, gin.H{"msg": validateError.ErrorMessage, "data": validateError})
+				}
 			}
 		}
+	} else {
+		Unauthorized(c)
 	}
+
 }
 
 // RegistrateByEmail handler
