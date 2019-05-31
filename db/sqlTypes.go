@@ -82,7 +82,7 @@ func (nt *NullTime) UnmarshalJSON(b []byte) error {
 		nt.Valid = false
 		return nil
 	}
-	x, err := time.Parse(time.RFC3339, s)
+	x, err := time.Parse(time.RFC1123Z, s)
 	if err != nil {
 		nt.Valid = false
 		return err
