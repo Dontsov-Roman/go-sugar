@@ -192,6 +192,7 @@ func RegistrateByEmail(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{"msg": authErr.Error()})
 			return
 		}
+		savedItem.Password = ""
 		c.JSON(http.StatusOK, gin.H{"data": savedItem, "token": auth.Token})
 		return
 	}
@@ -234,10 +235,22 @@ func AuthByEmail(c *gin.Context) {
 		}
 		auth := authsession.Auth{UserID: user.ID, DeviceID: creds.DeviceID, Token: token}
 		auth.Save()
+		user.Password = ""
 		c.JSON(http.StatusOK, gin.H{"data": user, "token": token})
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"msg": "Wrong password"})
 	}
+}
+
+// GetProfile get profile by token
+func GetProfile(c *gin.Context) {
+	user, err := getUser(c)
+	if err != nil {
+		Unauthorized(c)
+		return
+	}
+	fmt.Println(user)
+	c.JSON(http.StatusOK, gin.H{"data": user})
 }
 
 // GetUser by gin.context, parsing Authorization Header;
@@ -249,7 +262,6 @@ func getUser(c *gin.Context) (*users.User, error) {
 		return users.Repo.ParseJWT(token)
 	}
 	return nil, errors.New("No token")
-
 }
 
 // AuthMiddleware require auth

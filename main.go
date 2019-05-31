@@ -10,26 +10,33 @@ import (
 
 // Routes main struct for routes
 type Routes struct {
-	Users  string
-	Prices string
-	Orders string
+	Profile string
+	Users   string
+	Prices  string
+	Orders  string
 }
 
-var routes = Routes{Users: "/users", Prices: "/prices", Orders: "/orders"}
+var routes = Routes{Profile: "/profile", Users: "/users", Prices: "/prices", Orders: "/orders"}
 
 func main() {
 	route := gin.Default()
 	// users
-	route.GET(routes.Users+"/get-token-by-device-id/:id", routeshandlers.GetTokenByDeviceID)
-	route.POST(routes.Users+"/registrate-by-email", routeshandlers.RegistrateByEmail)
-	route.POST(routes.Users+"/auth-by-email", routeshandlers.AuthByEmail)
+	route.GET("/get-token-by-device-id/:id", routeshandlers.GetTokenByDeviceID)
+	route.POST("/registrate-by-email", routeshandlers.RegistrateByEmail)
+	route.POST("/auth-by-email", routeshandlers.AuthByEmail)
+	authorizedProfile := route.Group(routes.Profile)
+	{
+		authorizedProfile.Use(routeshandlers.AuthMiddleware)
+		authorizedProfile.GET("", routeshandlers.GetProfile)
+		authorizedProfile.POST("", routeshandlers.SaveUser)
+		authorizedProfile.PUT("", routeshandlers.SaveUser)
+
+	}
 	authorizedUsers := route.Group(routes.Users)
 	{
 		authorizedUsers.Use(routeshandlers.AuthMiddleware)
 		authorizedUsers.GET("", routeshandlers.GetAllUsers)
 		authorizedUsers.DELETE("/:id", routeshandlers.DeleteUser)
-		authorizedUsers.POST("", routeshandlers.SaveUser)
-		authorizedUsers.PUT("", routeshandlers.SaveUser)
 	}
 
 	// Prices
