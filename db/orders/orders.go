@@ -58,6 +58,6 @@ func parseRows(rows *sql.Rows) []Order {
 }
 func parseRow(row *sql.Rows) (Order, error) {
 	p := Order{}
-	err := row.Scan(&p.ID, &p.UserID, &p.Description, &p.Status, &p.CreatedAt, &p.UpdatedAt, &p.DeletedAt, &p.UserID, &p.Prices)
+	err := row.Scan(&p.ID, &p.UserID, &p.Description, &p.Time, &p.Status, &p.CreatedAt, &p.UpdatedAt, &p.DeletedAt, &p.UserID, &p.Prices)
 	return p, err
 }
