@@ -31,6 +31,13 @@ type Condition struct {
 	ConcatOperator string
 }
 
+// Order uses for request
+type Order struct {
+	TablePrefix string
+	By          []string
+	Asc         bool
+}
+
 // IRequestBuilder main interface
 type IRequestBuilder interface {
 	Select() *Request
@@ -49,6 +56,27 @@ type IRequestBuilder interface {
 	Offset(int) *Request
 	Limit(int) *Request
 	ToSQL() string
+}
+
+// ToString Order struct
+func (o *Order) ToString(withPrefix bool) string {
+	var str string
+	var orderType string
+	if o.Asc {
+		orderType = "ASC"
+	} else {
+		orderType = "DESC"
+	}
+	if withPrefix {
+		var stringsWithPrefix []string
+		for _, v := range o.By {
+			stringsWithPrefix = append(stringsWithPrefix, o.TablePrefix+"."+v)
+		}
+		str = strings.Join(stringsWithPrefix, ", ") + " " + orderType
+	} else {
+		str = strings.Join(o.By, ", ") + " " + orderType
+	}
+	return str
 }
 
 // New Request
@@ -156,6 +184,13 @@ func (r *Request) parseWhere() (string, error) {
 		return str, nil
 	}
 	return "", errors.New("No conditions in where")
+}
+
+// Order use Order struct,
+func (r *Request) Order(o *Order) *Request {
+	r.orderBy = o.By
+	r.orderAsc = o.Asc
+	return r
 }
 
 // OrderBy set order for select

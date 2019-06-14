@@ -11,6 +11,7 @@ import (
 	"go-sugar/db/authsession"
 	"go-sugar/db/orders"
 	"go-sugar/db/prices"
+	"go-sugar/db/request"
 	"go-sugar/db/users"
 
 	"github.com/gin-gonic/gin"
@@ -114,7 +115,10 @@ func SavePrice(c *gin.Context) {
 
 // GetAllOrders - get all prices for main screen
 func GetAllOrders(c *gin.Context) {
-	data := orders.Repo.GetAll()
+	orderBy := c.DefaultQuery("orderBy", "time,id")
+	orderType := c.DefaultQuery("orderType", "ASC")
+	order := request.Order{By: strings.Split(orderBy, ","), Asc: orderType == "ASC"}
+	data := orders.Repo.GetAll(&order)
 	if len(data) > 0 {
 		c.JSON(200, gin.H{"data": data})
 		return

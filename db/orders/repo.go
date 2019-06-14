@@ -23,8 +23,10 @@ type Repository struct {
 var Repo = Repository{tableName: Config.DB.Schema + ".orders", delimiter: ","}
 
 // GetAll Orders
-func (r *Repository) GetAll() []Order {
-	str := "select *,(SELECT user_id FROM orders_prices where order_id=orders.id limit 1) as user_id, (select group_concat(price_id) from orders_prices where order_id=orders.id) as prices from " + r.tableName
+func (r *Repository) GetAll(o *request.Order) []Order {
+	o.TablePrefix = r.tableName
+	str := "SELECT *,(SELECT user_id FROM orders_prices where order_id=orders.id limit 1) as user_id, (select group_concat(price_id) FROM orders_prices WHERE order_id=orders.id) AS prices FROM " + r.tableName + " ORDER BY " + o.ToString(true)
+	fmt.Println(str)
 	rows, err := DB.Query(str)
 	if err != nil {
 		fmt.Println(err)
@@ -104,12 +106,12 @@ func (r *Repository) DeleteByID(id string) bool {
 		fmt.Println(sqlErr)
 		return false
 	}
-	result, err := DB.Exec(str)
+	_, err := DB.Exec(str)
 	if err != nil {
 		fmt.Println(err)
 		return false
 	}
-	fmt.Println(result.LastInsertId()) // id последнего удаленого объекта
-	fmt.Println(result.RowsAffected()) // количество затронутых строк
+	// fmt.Println(result.LastInsertId()) // id последнего удаленого объекта
+	// fmt.Println(result.RowsAffected()) // количество затронутых строк
 	return true
 }
