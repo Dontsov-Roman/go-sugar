@@ -8,6 +8,7 @@ import (
 	. "go-sugar/db"
 	"go-sugar/db/ordersprices"
 	"go-sugar/db/request"
+	"go-sugar/db/users"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,9 +24,10 @@ type Repository struct {
 var Repo = Repository{tableName: Config.DB.Schema + ".orders", delimiter: ","}
 
 // GetAll Orders
-func (r *Repository) GetAll(o *request.Order) []Order {
+func (r *Repository) GetAll(u *users.User, o *request.Order) []Order {
 	o.TablePrefix = r.tableName
-	str := "SELECT *,(SELECT user_id FROM orders_prices where order_id=orders.id limit 1) as user_id, (select group_concat(price_id) FROM orders_prices WHERE order_id=orders.id) AS prices FROM " + r.tableName + " ORDER BY " + o.ToString(true)
+	userID := strconv.Itoa(u.ID)
+	str := "SELECT *, (select group_concat(price_id) FROM orders_prices WHERE order_id=orders.id) AS prices FROM " + r.tableName + " WHERE user_id = " + userID + " ORDER BY " + o.ToString(true)
 	fmt.Println(str)
 	rows, err := DB.Query(str)
 	if err != nil {

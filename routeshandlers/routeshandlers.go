@@ -115,10 +115,15 @@ func SavePrice(c *gin.Context) {
 
 // GetAllOrders - get all prices for main screen
 func GetAllOrders(c *gin.Context) {
+	user, err := getUser(c)
+	if err != nil {
+		Unauthorized(c)
+		return
+	}
 	orderBy := c.DefaultQuery("orderBy", "time,id")
 	orderType := c.DefaultQuery("orderType", "ASC")
 	order := request.Order{By: strings.Split(orderBy, ","), Asc: orderType == "ASC"}
-	data := orders.Repo.GetAll(&order)
+	data := orders.Repo.GetAll(user, &order)
 	if len(data) > 0 {
 		c.JSON(200, gin.H{"data": data})
 		return

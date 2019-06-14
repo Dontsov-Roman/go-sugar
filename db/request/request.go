@@ -38,6 +38,12 @@ type Order struct {
 	Asc         bool
 }
 
+// Paginator uses for request limit, offset
+type Paginator struct {
+	Page    int
+	PerPage int
+}
+
 // IRequestBuilder main interface
 type IRequestBuilder interface {
 	Select() *Request
