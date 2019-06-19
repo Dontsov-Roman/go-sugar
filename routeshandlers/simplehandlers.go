@@ -36,3 +36,9 @@ func Unauthorized(c *gin.Context) {
 	c.JSON(http.StatusUnauthorized, gin.H{"msg": "Unauthorized"})
 	c.Abort()
 }
+
+// Forbidden Response with abort
+func Forbidden(c *gin.Context) {
+	c.JSON(http.StatusForbidden, gin.H{"msg": "Forbidden"})
+	c.Abort()
+}

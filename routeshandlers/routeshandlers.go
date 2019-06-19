@@ -113,8 +113,9 @@ func SavePrice(c *gin.Context) {
 	}
 }
 
-// GetAllOrders - get all prices for main screen
-func GetAllOrders(c *gin.Context) {
+// GetAllOrdersByUser - get all prices for main screen for authorizedUsers
+func GetAllOrdersByUser(c *gin.Context) {
+	var data []orders.Order
 	user, err := getUser(c)
 	if err != nil {
 		Unauthorized(c)
@@ -123,7 +124,24 @@ func GetAllOrders(c *gin.Context) {
 	orderBy := c.DefaultQuery("orderBy", "time,id")
 	orderType := c.DefaultQuery("orderType", "ASC")
 	order := request.Order{By: strings.Split(orderBy, ","), Asc: orderType == "ASC"}
-	data := orders.Repo.GetAll(user, &order)
+	if user.IsAdmin() {
+		data = orders.Repo.GetAll(&order)
+	} else {
+		data = orders.Repo.GetAllByUser(&order, user)
+	}
+	if len(data) > 0 {
+		c.JSON(200, gin.H{"data": data})
+		return
+	}
+	GetAllNoDataJSON(c)
+}
+
+// GetAllOrders - get all prices for main screen for admin
+func GetAllOrders(c *gin.Context) {
+	orderBy := c.DefaultQuery("orderBy", "time,id")
+	orderType := c.DefaultQuery("orderType", "ASC")
+	order := request.Order{By: strings.Split(orderBy, ","), Asc: orderType == "ASC"}
+	data := orders.Repo.GetAll(&order)
 	if len(data) > 0 {
 		c.JSON(200, gin.H{"data": data})
 		return
@@ -278,6 +296,20 @@ func AuthMiddleware(c *gin.Context) {
 	_, err := getUser(c)
 	if err != nil {
 		Unauthorized(c)
+		return
+	}
+	c.Next()
+}
+
+// AdminMiddleware require auth and admin
+func AdminMiddleware(c *gin.Context) {
+	user, err := getUser(c)
+	if err != nil {
+		Unauthorized(c)
+		return
+	}
+	if !user.IsAdmin() {
+		Forbidden(c)
 		return
 	}
 	c.Next()

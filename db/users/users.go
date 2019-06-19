@@ -66,6 +66,14 @@ func (u *User) Delete() bool {
 func (u *User) CheckPassword(password string) bool {
 	return Repo.CreateHash(password) == u.Password
 }
+
+// IsAdmin check if user is admin
+func (u *User) IsAdmin() bool {
+	if u.Type == 1 {
+		return true
+	}
+	return false
+}
 func parseRows(rows *sql.Rows) []User {
 	var users []User
 	for rows.Next() {

@@ -23,15 +23,25 @@ type Repository struct {
 // Repo users repository
 var Repo = Repository{tableName: Config.DB.Schema + ".orders", delimiter: ","}
 
-// GetAll Orders
-func (r *Repository) GetAll(u *users.User, o *request.Order) []Order {
+// GetAllByUser Orders by User
+func (r *Repository) GetAllByUser(o *request.Order, u *users.User) []Order {
 	o.TablePrefix = r.tableName
 	userID := strconv.Itoa(u.ID)
 	str := "SELECT *, (select group_concat(price_id) FROM orders_prices WHERE order_id=orders.id) AS prices FROM " + r.tableName + " WHERE user_id = " + userID + " ORDER BY " + o.ToString(true)
-	fmt.Println(str)
 	rows, err := DB.Query(str)
 	if err != nil {
-		fmt.Println(err)
+		return []Order{}
+	}
+	orders := parseRows(rows)
+	return orders
+}
+
+// GetAll Orders User
+func (r *Repository) GetAll(o *request.Order) []Order {
+	o.TablePrefix = r.tableName
+	str := "SELECT *, (select group_concat(price_id) FROM orders_prices WHERE order_id=orders.id) AS prices FROM " + r.tableName + " ORDER BY " + o.ToString(true)
+	rows, err := DB.Query(str)
+	if err != nil {
 		return []Order{}
 	}
 	orders := parseRows(rows)

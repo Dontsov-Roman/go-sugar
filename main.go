@@ -53,11 +53,16 @@ func main() {
 	authorizedOrders := route.Group(routes.Orders)
 	{
 		authorizedOrders.Use(routeshandlers.AuthMiddleware)
-		authorizedOrders.GET("", routeshandlers.GetAllOrders)
+		authorizedOrders.GET("", routeshandlers.GetAllOrdersByUser)
 		authorizedOrders.DELETE("/:id", routeshandlers.DeleteOrder)
 		authorizedOrders.POST("", routeshandlers.SaveOrder)
 		authorizedOrders.PUT("", routeshandlers.SaveOrder)
 	}
+	adminOrders := route.Group(routes.Orders)
+	{
+		adminOrders.Use(routeshandlers.AdminMiddleware)
+		authorizedOrders.GET("/all", routeshandlers.GetAllOrders)
 
+	}
 	route.Run(":" + Config.HTTPPort)
 }
