@@ -18,13 +18,14 @@ type Repository struct {
 // Repo repository
 var Repo = Repository{tableName: "auth_session"}
 
-// DeleteByUserID - remove previous all user's session
-func (r *Repository) DeleteByUserID(UserID int) (bool, error) {
+// CleanBeforeCreate - remove previous all user's session
+func (r *Repository) CleanBeforeCreate(a *Auth) (bool, error) {
 	Request := request.New(DB)
 	_, err := Request.
 		Delete().
 		From(r.tableName).
-		Where(request.Condition{Column: "user_id", Operator: "=", Value: strconv.Itoa(UserID)}).
+		Where(request.Condition{Column: "user_id", Operator: "=", Value: strconv.Itoa(a.UserID), ConcatOperator: "OR"}).
+		Where(request.Condition{Column: "device_id", Operator: "=", Value: a.DeviceID, ConcatOperator: "OR"}).
 		Exec()
 	if err != nil {
 		return false, err
@@ -45,12 +46,16 @@ func (r *Repository) Create(auth *Auth) (*Auth, error) {
 // GetByDeviceID get Auth session by device_id
 func (r *Repository) GetByDeviceID(DeviceID string) (*Auth, error) {
 	Request := request.New(DB)
-	sql, _ := Request.
+	var orderBy []string
+	orderBy = append(orderBy, "created_at")
+	rows, err := Request.
 		Select().
 		From(r.tableName).
 		Where(request.Condition{Column: "device_id", Operator: "=", Value: DeviceID, ConcatOperator: "OR"}).
-		ToSQL()
-	rows, err := DB.Query(sql)
+		OrderBy(orderBy).
+		Desc().
+		Limit(1).
+		Query()
 	if err != nil {
 		return nil, err
 	}

@@ -20,7 +20,7 @@ func GetByDeviceID(id string) (*Auth, error) {
 
 // Save - create new AUTH session
 func (a *Auth) Save() (*Auth, error) {
-	_, err := Repo.DeleteByUserID(a.UserID)
+	_, err := Repo.CleanBeforeCreate(a)
 	if err != nil {
 		return nil, err
 	}

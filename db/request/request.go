@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -248,14 +249,20 @@ func (r *Request) ToSQL() (string, error) {
 		if len(r.join) > 0 {
 			str += r.join
 		}
-		if r.limit != 0 {
-			str = str + " LIMIT " + string(r.limit)
-			if r.offset != 0 {
-				str = str + " OFFSET " + string(r.limit)
-			}
-		}
 		if len(r.orderBy) > 0 {
 			str = str + " ORDER BY " + strings.Join(r.orderBy, ",")
+			orderType := " ASC"
+			if !r.orderAsc {
+				orderType = " DESC"
+			}
+			str = str + orderType
+		}
+
+		if r.limit != 0 {
+			str = str + " LIMIT " + strconv.Itoa(r.limit)
+			if r.offset != 0 {
+				str = str + " OFFSET " + strconv.Itoa(r.offset)
+			}
 		}
 	case 2:
 		str = "UPDATE " + r.tableName + " SET "
@@ -273,7 +280,6 @@ func (r *Request) ToSQL() (string, error) {
 			values = append(values, "("+strings.Join(val, ",")+")")
 		}
 		str = str + " (" + strings.Join(r.keys, ",") + ") VALUES " + strings.Join(values, ",")
-		fmt.Println(str)
 	case 4:
 		str = "DELETE FROM " + r.tableName
 		where, err := r.parseWhere()

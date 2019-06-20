@@ -235,7 +235,6 @@ func RegistrateByEmail(c *gin.Context) {
 func GetTokenByDeviceID(c *gin.Context) {
 	auth, err := authsession.GetByDeviceID(c.Param("id"))
 	if err != nil {
-		fmt.Println(err.Error())
 		c.JSON(http.StatusNotFound, gin.H{"msg": err.Error()})
 	} else {
 		c.JSON(http.StatusOK, gin.H{"token": auth.Token})
