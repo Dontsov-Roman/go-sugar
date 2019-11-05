@@ -16,6 +16,20 @@ import (
 	"go-sugar/db/request"
 )
 
+// Columns
+const (
+	ID        string = "id"
+	Name      string = "name"
+	Password  string = "password"
+	Type      string = "type"
+	Status    string = "status"
+	Email     string = "email"
+	Phone     string = "phone"
+	CreatedAt string = "created_at"
+	UpdatedAt string = "updated_at"
+	DeletedAt string = "deleted_at"
+)
+
 // Repository User Repository
 type Repository struct {
 	tableName      string

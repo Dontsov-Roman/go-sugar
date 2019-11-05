@@ -217,6 +217,7 @@ func RegistrateByEmail(c *gin.Context) {
 		Phone:    registrateByEmail.Phone,
 		Password: registrateByEmail.Password,
 	}
+	fmt.Println(newUser)
 	savedItem, err := newUser.Save()
 	if err == nil {
 		token, err := users.Repo.CreateJWT(savedItem)
