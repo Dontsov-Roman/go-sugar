@@ -19,7 +19,9 @@ type Repository struct {
 // GetAll OrderPrices
 func (r *Repository) GetAll() []OrderPrice {
 	Request := request.New(DB)
-	rows, err := Request.Select().From(r.tableName).Query()
+	rows, err := Request.
+		Select([]string{}).
+		From(r.tableName).Query()
 	if err != nil {
 		fmt.Println(err)
 		return []OrderPrice{}
@@ -55,7 +57,7 @@ func (r *Repository) Validate(item *OrderPrice) (bool, ValidateError) {
 	priceID := item.PriceID.ToString()
 	validateError := ValidateError{}
 	rows, err := Request.
-		Select().
+		Select([]string{}).
 		From(r.tableName).
 		Where(request.Condition{Column: "order_id", Operator: "=", Value: id, ConcatOperator: "AND"}).
 		Where(request.Condition{Column: "price_id", Operator: "=", Value: priceID, ConcatOperator: "AND"}).
@@ -100,7 +102,7 @@ func (r *Repository) DeleteByOrderID(id string) bool {
 func (r *Repository) GetByOrderID(id string) []OrderPrice {
 	Request := request.New(DB)
 	rows, err := Request.
-		Select().
+		Select([]string{}).
 		From(r.tableName).
 		Where(request.Condition{Column: "order_id", Operator: "=", Value: id, ConcatOperator: "OR"}).
 		Query()

@@ -13,6 +13,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// Columns
+const (
+	ID          string = "id"
+	UserID      string = "user_id"
+	Description string = "description"
+	Time        string = "time"
+	TimeEnd     string = "time_end"
+	Status      string = "status"
+	CreatedAt   string = "created_at"
+	UpdatedAt   string = "updated_at"
+	DeletedAt   string = "deleted_at"
+)
+
 // Repository Orders
 type Repository struct {
 	tableName string
@@ -52,8 +65,8 @@ func (r *Repository) GetAll(o *request.Order) []Order {
 func (r *Repository) GetAllReserve() []Reserve {
 	Request := request.New(DB)
 	var columns []string
-	columns = append(columns, "id", "time", "time_end")
-	req := Request.Select().Columns(columns).From(r.tableName).Where(request.Condition{Column: "time_end", Operator: ">", Value: "NOW()"})
+	columns = append(columns, ID, Time, TimeEnd)
+	req := Request.Select(columns).From(r.tableName).Where(request.Condition{Column: "time_end", Operator: ">", Value: "NOW()"})
 	rows, err := req.Query()
 	sql, _ := req.ToSQL()
 	fmt.Println(sql)
@@ -101,7 +114,7 @@ func (r *Repository) Validate(item *Order) (bool, ValidateError) {
 	id := strconv.Itoa(item.ID)
 	validateError := ValidateError{}
 	rows, err := Request.
-		Select().
+		Select([]string{}).
 		From(r.tableName).
 		Where(request.Condition{Column: "id", Operator: "=", Value: id, ConcatOperator: "OR"}).
 		Query()

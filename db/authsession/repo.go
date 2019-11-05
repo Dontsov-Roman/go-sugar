@@ -49,7 +49,7 @@ func (r *Repository) GetByDeviceID(DeviceID string) (*Auth, error) {
 	var orderBy []string
 	orderBy = append(orderBy, "created_at")
 	rows, err := Request.
-		Select().
+		Select([]string{}).
 		From(r.tableName).
 		Where(request.Condition{Column: "device_id", Operator: "=", Value: DeviceID, ConcatOperator: "OR"}).
 		OrderBy(orderBy).

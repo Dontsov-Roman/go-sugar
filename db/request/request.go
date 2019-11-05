@@ -113,13 +113,8 @@ func (r *Request) SetDB(db *sql.DB) *Request {
 }
 
 // Select === SetType(SELECT)
-func (r *Request) Select() *Request {
+func (r *Request) Select(columns []string) *Request {
 	r.SetType(1)
-	return r
-}
-
-// Columns === Columns(SELECT)
-func (r *Request) Columns(columns []string) *Request {
 	r.columns = columns
 	return r
 }

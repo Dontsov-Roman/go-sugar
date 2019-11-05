@@ -19,7 +19,7 @@ type Repository struct {
 // GetAll Prices
 func (r *Repository) GetAll() []Price {
 	Request := request.New(DB)
-	rows, err := Request.Select().From(r.tableName).Query()
+	rows, err := Request.Select([]string{}).From(r.tableName).Query()
 	if err != nil {
 		fmt.Println(err)
 		return []Price{}
@@ -48,7 +48,7 @@ func (r *Repository) Validate(item *Price) (bool, ValidateError) {
 	id := strconv.Itoa(item.ID)
 	validateError := ValidateError{}
 	rows, err := Request.
-		Select().
+		Select([]string{}).
 		From(r.tableName).
 		Where(request.Condition{Column: "id", Operator: "=", Value: id, ConcatOperator: "OR"}).
 		Query()

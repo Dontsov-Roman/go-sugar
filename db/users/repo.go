@@ -36,7 +36,7 @@ var Repo = Repository{
 // GetAll Users
 func (r *Repository) GetAll() []User {
 	Request := request.New(DB)
-	rows, err := Request.Select().From(r.tableName).Query()
+	rows, err := Request.Select([]string{}).From(r.tableName).Query()
 	if err != nil {
 		return []User{}
 	}
@@ -64,7 +64,7 @@ func (r *Repository) Validate(user *User) (bool, ValidateError) {
 	id := strconv.Itoa(user.ID)
 	validateError := ValidateError{}
 	rows, err := Request.
-		Select().
+		Select([]string{}).
 		From(r.tableName).
 		Where(request.Condition{Column: "id", Operator: "=", Value: id, ConcatOperator: "OR"}).
 		Where(request.Condition{Column: "email", Operator: "=", Value: user.Email, ConcatOperator: "OR"}).
@@ -128,8 +128,9 @@ func (r *Repository) DeleteByID(id string) bool {
 // FindByID - find user by ID
 func (r *Repository) FindByID(id string) (*User, error) {
 	Request := request.New(DB)
+	var columns []string
 	rows, err := Request.
-		Select().
+		Select(columns).
 		From(r.tableName).
 		Where(request.Condition{Column: "id", Operator: "=", Value: id, ConcatOperator: "OR"}).
 		Query()
@@ -146,7 +147,7 @@ func (r *Repository) FindByID(id string) (*User, error) {
 func (r *Repository) FindByEmail(email string) (*User, error) {
 	Request := request.New(DB)
 	rows, err := Request.
-		Select().
+		Select([]string{}).
 		From(r.tableName).
 		Where(request.Condition{Column: "email", Operator: "=", Value: email, ConcatOperator: "OR"}).
 		Query()
