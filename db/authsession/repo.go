@@ -10,6 +10,15 @@ import (
 	"go-sugar/db/request"
 )
 
+// Columns
+const (
+	UserID    string = "user_id"
+	DeviceID  string = "device_id"
+	Token     string = "token"
+	CreatedAt string = "created_at"
+	UpdatedAt string = "updated_at"
+)
+
 // Repository User Repository
 type Repository struct {
 	tableName string
@@ -24,10 +33,11 @@ func (r *Repository) CleanBeforeCreate(a *Auth) (bool, error) {
 	_, err := Request.
 		Delete().
 		From(r.tableName).
-		Where(request.Condition{Column: "user_id", Operator: "=", Value: strconv.Itoa(a.UserID), ConcatOperator: "OR"}).
-		Where(request.Condition{Column: "device_id", Operator: "=", Value: a.DeviceID, ConcatOperator: "OR"}).
+		Where(request.Condition{Column: UserID, Operator: "=", Value: strconv.Itoa(a.UserID), ConcatOperator: "OR"}).
+		Where(request.Condition{Column: DeviceID, Operator: "=", Value: a.DeviceID, ConcatOperator: "OR"}).
 		Exec()
 	if err != nil {
+		fmt.Println(err)
 		return false, err
 	}
 	return true, nil
@@ -36,6 +46,7 @@ func (r *Repository) CleanBeforeCreate(a *Auth) (bool, error) {
 // Create new auth session
 func (r *Repository) Create(auth *Auth) (*Auth, error) {
 	str := `INSERT INTO ` + r.tableName + ` (user_id, device_id, token) values(?, ?, ?)`
+	fmt.Println(str)
 	_, err := DB.Exec(str, auth.UserID, auth.DeviceID, auth.Token)
 	if err != nil {
 		return nil, err
@@ -47,11 +58,11 @@ func (r *Repository) Create(auth *Auth) (*Auth, error) {
 func (r *Repository) GetByDeviceID(DeviceID string) (*Auth, error) {
 	Request := request.New(DB)
 	var orderBy []string
-	orderBy = append(orderBy, "created_at")
+	orderBy = append(orderBy, CreatedAt)
 	rows, err := Request.
 		Select([]string{}).
 		From(r.tableName).
-		Where(request.Condition{Column: "device_id", Operator: "=", Value: DeviceID, ConcatOperator: "OR"}).
+		Where(request.Condition{Column: DeviceID, Operator: "=", Value: DeviceID, ConcatOperator: "OR"}).
 		OrderBy(orderBy).
 		Desc().
 		Limit(1).

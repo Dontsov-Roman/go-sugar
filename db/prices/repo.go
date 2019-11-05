@@ -3,11 +3,24 @@ package prices
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	. "go-sugar/db"
 	"go-sugar/db/request"
 
 	"github.com/gin-gonic/gin"
+)
+
+// Columns
+const (
+	ID          string = "id"
+	Name        string = "name"
+	Status      string = "status"
+	PriceColumn string = "price"
+	Time        string = "time"
+	CreatedAt   string = "created_at"
+	UpdatedAt   string = "updated_at"
+	DeletedAt   string = "deleted_at"
 )
 
 // Repository Price
@@ -29,7 +42,8 @@ func (r *Repository) GetAll() []Price {
 
 // Create new Price
 func (r *Repository) Create(item *Price) (*Price, error) {
-	str := `INSERT INTO ` + r.tableName + ` (name, status, price, time) values(?, ?, ?, ?)`
+	columns := []string{Name, Status, PriceColumn, Time}
+	str := `INSERT INTO ` + r.tableName + ` (` + strings.Join(columns, ",") + `) values(?, ?, ?, ?)`
 	result, err := DB.Exec(str, item.Name, item.Status, item.Price, item.Time)
 	if err != nil {
 		fmt.Println(err)
@@ -50,7 +64,7 @@ func (r *Repository) Validate(item *Price) (bool, ValidateError) {
 	rows, err := Request.
 		Select([]string{}).
 		From(r.tableName).
-		Where(request.Condition{Column: "id", Operator: "=", Value: id, ConcatOperator: "OR"}).
+		Where(request.Condition{Column: ID, Operator: "=", Value: id, ConcatOperator: "OR"}).
 		Query()
 	if err == nil {
 		selectedPrices := parseRows(rows)
@@ -86,7 +100,7 @@ func (r *Repository) DeleteByID(id string) bool {
 	str, sqlErr := Request.
 		Delete().
 		From(r.tableName).
-		Where(request.Condition{Column: "id", Operator: "=", Value: id, ConcatOperator: "OR"}).
+		Where(request.Condition{Column: ID, Operator: "=", Value: id, ConcatOperator: "OR"}).
 		ToSQL()
 	if sqlErr != nil {
 		fmt.Println(sqlErr)

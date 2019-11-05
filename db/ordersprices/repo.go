@@ -10,6 +10,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// Columns
+const (
+	OrderID string = "order_id"
+	UserID  string = "user_id"
+	PriceID string = "price_id"
+)
+
 // Repository OrderPrices
 type Repository struct {
 	tableName string
@@ -32,7 +39,7 @@ func (r *Repository) GetAll() []OrderPrice {
 // Create new OrderPrice
 func (r *Repository) Create(items []OrderPrice) ([]OrderPrice, error) {
 	Request := request.New(DB)
-	keys := []string{"order_id", "user_id", "price_id"}
+	keys := []string{OrderID, UserID, PriceID}
 	var values = [][]string{}
 	for _, item := range items {
 		orderID := strconv.Itoa(item.OrderID)
@@ -59,8 +66,8 @@ func (r *Repository) Validate(item *OrderPrice) (bool, ValidateError) {
 	rows, err := Request.
 		Select([]string{}).
 		From(r.tableName).
-		Where(request.Condition{Column: "order_id", Operator: "=", Value: id, ConcatOperator: "AND"}).
-		Where(request.Condition{Column: "price_id", Operator: "=", Value: priceID, ConcatOperator: "AND"}).
+		Where(request.Condition{Column: OrderID, Operator: "=", Value: id, ConcatOperator: "AND"}).
+		Where(request.Condition{Column: PriceID, Operator: "=", Value: priceID, ConcatOperator: "AND"}).
 		Query()
 	if err == nil {
 		selectedOrderPrices := parseRows(rows)
@@ -82,7 +89,7 @@ func (r *Repository) DeleteByOrderID(id string) bool {
 	str, sqlErr := Request.
 		Delete().
 		From(r.tableName).
-		Where(request.Condition{Column: "order_id", Operator: "=", Value: id, ConcatOperator: "OR"}).
+		Where(request.Condition{Column: OrderID, Operator: "=", Value: id, ConcatOperator: "OR"}).
 		ToSQL()
 	if sqlErr != nil {
 		fmt.Println(sqlErr)
@@ -104,7 +111,7 @@ func (r *Repository) GetByOrderID(id string) []OrderPrice {
 	rows, err := Request.
 		Select([]string{}).
 		From(r.tableName).
-		Where(request.Condition{Column: "order_id", Operator: "=", Value: id, ConcatOperator: "OR"}).
+		Where(request.Condition{Column: OrderID, Operator: "=", Value: id, ConcatOperator: "OR"}).
 		Query()
 	if err != nil {
 		fmt.Println(err)

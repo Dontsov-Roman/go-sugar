@@ -206,6 +206,7 @@ func SaveOrder(c *gin.Context) {
 func RegistrateByEmail(c *gin.Context) {
 	registrateByEmail := users.RegistrateByEmailUser{}
 	if err := c.ShouldBindJSON(&registrateByEmail); err != nil {
+		fmt.Println(err)
 		c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
 		return
 	}
@@ -258,6 +259,7 @@ func AuthByEmail(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
 		return
 	}
+	fmt.Println(creds)
 	user, err := users.Repo.FindByEmail(creds.Email)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"msg": err.Error()})
