@@ -149,6 +149,16 @@ func GetAllOrders(c *gin.Context) {
 	GetAllNoDataJSON(c)
 }
 
+// GetAllReserve - get all reserved Times with Time and TimeEnd values
+func GetAllReserve(c *gin.Context) {
+	data := orders.Repo.GetAllReserve()
+	if len(data) > 0 {
+		c.JSON(200, gin.H{"data": data})
+		return
+	}
+	GetAllNoDataJSON(c)
+}
+
 // DeleteOrder by param path
 func DeleteOrder(c *gin.Context) {
 	if id, err := strconv.Atoi(c.Param("id")); err == nil {

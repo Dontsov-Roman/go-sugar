@@ -45,7 +45,7 @@ func (item *Order) Delete() bool {
 }
 
 func parseRows(rows *sql.Rows) []Order {
-	var users []Order
+	var data []Order
 	for rows.Next() {
 		p, err := parseRow(rows)
 		if err != nil {
@@ -53,9 +53,9 @@ func parseRows(rows *sql.Rows) []Order {
 			fmt.Println(err)
 			continue
 		}
-		users = append(users, p)
+		data = append(data, p)
 	}
-	return users
+	return data
 }
 func parseRow(row *sql.Rows) (Order, error) {
 	p := Order{}

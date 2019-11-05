@@ -48,6 +48,22 @@ func (r *Repository) GetAll(o *request.Order) []Order {
 	return orders
 }
 
+// GetAllReserve return an array of Reserve
+func (r *Repository) GetAllReserve() []Reserve {
+	Request := request.New(DB)
+	var columns []string
+	columns = append(columns, "id", "time", "time_end")
+	req := Request.Select().Columns(columns).From(r.tableName).Where(request.Condition{Column: "time_end", Operator: ">", Value: "NOW()"})
+	rows, err := req.Query()
+	sql, _ := req.ToSQL()
+	fmt.Println(sql)
+	if err != nil {
+		fmt.Println(err)
+		return []Reserve{}
+	}
+	return parseRowsReserve(rows)
+}
+
 // Create new Order
 func (r *Repository) Create(item *Order) (*Order, error) {
 	str := `INSERT INTO ` + r.tableName + ` (user_id, description, status, time, time_end) values(?, ?, ?, ?, ?)`

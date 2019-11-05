@@ -8,15 +8,28 @@ import (
 	"strings"
 )
 
+// requestType - enum of types
+type requestType int
+
+// Requests
+const (
+	UNDEFINED requestType = 0
+	SELECT    requestType = 1
+	UPDATE    requestType = 2
+	INSERT    requestType = 3
+	DELETE    requestType = 4
+)
+
 // Request structure
 type Request struct {
 	tableName   string
 	join        string
+	columns     []string
 	keys        []string
 	values      [][]string
 	set         map[string]string
 	where       []Condition
-	requestType int // select - 1 | update - 2 | insert - 3 | delete - 4
+	requestType requestType // SELECT UPDATE INSERT DELETE
 	orderBy     []string
 	orderAsc    bool
 	offset      int
@@ -99,33 +112,39 @@ func (r *Request) SetDB(db *sql.DB) *Request {
 	return r
 }
 
-// Select === SetType(1)
+// Select === SetType(SELECT)
 func (r *Request) Select() *Request {
 	r.SetType(1)
 	return r
 }
 
-// Update === SetType(2)
+// Columns === Columns(SELECT)
+func (r *Request) Columns(columns []string) *Request {
+	r.columns = columns
+	return r
+}
+
+// Update === SetType(UPDATE)
 func (r *Request) Update(tableName string) *Request {
 	r.SetType(2)
 	r.tableName = tableName
 	return r
 }
 
-// Insert === SetType(3)
+// Insert === SetType(INSERT)
 func (r *Request) Insert() *Request {
 	r.SetType(3)
 	return r
 }
 
-// Delete === SetType(4)
+// Delete === SetType(DELETE)
 func (r *Request) Delete() *Request {
 	r.SetType(4)
 	return r
 }
 
-// SetType select - 1 | update - 2 | insert - 3 | delete - 4
-func (r *Request) SetType(typeRequest int) *Request {
+// SetType SELECT INSERT UPDATE DELETE
+func (r *Request) SetType(typeRequest requestType) *Request {
 	r.requestType = typeRequest
 	return r
 }
@@ -183,7 +202,7 @@ func (r *Request) parseWhere() (string, error) {
 	if length > 0 {
 		for i := 0; i < length; i++ {
 			fmt.Println(length, i)
-			str = str + r.where[i].Column + r.where[i].Operator + "\"" + r.where[i].Value + "\""
+			str = str + r.where[i].Column + r.where[i].Operator + r.where[i].Value
 			if i+1 < length {
 				str = str + " " + r.where[i].ConcatOperator + " "
 			}
@@ -230,6 +249,13 @@ func (r *Request) Limit(limit int) *Request {
 	r.limit = limit
 	return r
 }
+func (r *Request) getColumns() string {
+	if len(r.columns) < 1 {
+		return "*"
+	} else {
+		return strings.Join(r.columns, ",")
+	}
+}
 
 // ToSQL return a SQL string
 func (r *Request) ToSQL() (string, error) {
@@ -237,12 +263,12 @@ func (r *Request) ToSQL() (string, error) {
 	if r.tableName == "" {
 		return "", errors.New("no table name")
 	}
-	if r.requestType == 0 {
+	if r.requestType == UNDEFINED {
 		return "", errors.New("no requestType")
 	}
 	switch r.requestType {
-	case 1:
-		str = "SELECT * FROM " + r.tableName
+	case SELECT:
+		str = "SELECT " + r.getColumns() + " FROM " + r.tableName
 		if where, err := r.parseWhere(); err == nil {
 			str = str + where
 		}
@@ -264,7 +290,7 @@ func (r *Request) ToSQL() (string, error) {
 				str = str + " OFFSET " + strconv.Itoa(r.offset)
 			}
 		}
-	case 2:
+	case UPDATE:
 		str = "UPDATE " + r.tableName + " SET "
 		for key, val := range r.set {
 			str = str + key + " = " + val + ", "
@@ -273,14 +299,14 @@ func (r *Request) ToSQL() (string, error) {
 		if where, err := r.parseWhere(); err == nil {
 			str = str + where
 		}
-	case 3:
+	case INSERT:
 		str = "INSERT INTO " + r.tableName
 		var values []string
 		for _, val := range r.values {
 			values = append(values, "("+strings.Join(val, ",")+")")
 		}
 		str = str + " (" + strings.Join(r.keys, ",") + ") VALUES " + strings.Join(values, ",")
-	case 4:
+	case DELETE:
 		str = "DELETE FROM " + r.tableName
 		where, err := r.parseWhere()
 		if err == nil {
