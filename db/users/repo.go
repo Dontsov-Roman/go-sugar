@@ -63,10 +63,13 @@ func (r *Repository) Create(user *User) (*User, error) {
 	str := `INSERT INTO ` + r.tableName + ` (type, email, phone, name, status, password) values(?, ?, ?, ?, ?, ?)`
 	result, err := DB.Exec(str, user.Type, user.Email, user.Phone, user.Name, user.Status, user.Password)
 	if err != nil {
+		fmt.Println(err)
 		return nil, err
 	}
 	if id, insertErr := result.LastInsertId(); insertErr == nil {
 		user.ID = int(id)
+	} else {
+		return nil, insertErr
 	}
 	return user, nil
 }
@@ -160,11 +163,12 @@ func (r *Repository) FindByID(id string) (*User, error) {
 // FindByEmail - find user by ID
 func (r *Repository) FindByEmail(email string) (*User, error) {
 	Request := request.New(DB)
-	rows, err := Request.
-		Select([]string{}).
+	req := Request.Select([]string{}).
 		From(r.tableName).
-		Where(request.Condition{Column: "email", Operator: "=", Value: email, ConcatOperator: "OR"}).
+		Where(request.Condition{Column: "email", Operator: "=", Value: email, ConcatOperator: "OR"})
+	rows, err := req.
 		Query()
+
 	if err == nil {
 		users := parseRows(rows)
 		if len(users) > 0 {

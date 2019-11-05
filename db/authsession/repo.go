@@ -37,7 +37,7 @@ func (r *Repository) CleanBeforeCreate(a *Auth) (bool, error) {
 		Where(request.Condition{Column: DeviceID, Operator: "=", Value: a.DeviceID, ConcatOperator: "OR"}).
 		Exec()
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("CleanBeforeCreate: ", err)
 		return false, err
 	}
 	return true, nil

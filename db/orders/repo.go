@@ -66,7 +66,7 @@ func (r *Repository) GetAllReserve() []Reserve {
 	Request := request.New(DB)
 	var columns []string
 	columns = append(columns, ID, Time, TimeEnd)
-	req := Request.Select(columns).From(r.tableName).Where(request.Condition{Column: "time_end", Operator: ">", Value: "NOW()"})
+	req := Request.Select(columns).From(r.tableName).Where(request.Condition{Column: "time_end", Operator: ">", Value: "NOW()", Native: true})
 	rows, err := req.Query()
 	sql, _ := req.ToSQL()
 	fmt.Println(sql)

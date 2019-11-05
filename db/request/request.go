@@ -43,6 +43,7 @@ type Condition struct {
 	Operator       string
 	Value          string
 	ConcatOperator string
+	Native         bool
 }
 
 // Order uses for request
@@ -114,27 +115,27 @@ func (r *Request) SetDB(db *sql.DB) *Request {
 
 // Select === SetType(SELECT)
 func (r *Request) Select(columns []string) *Request {
-	r.SetType(1)
+	r.SetType(SELECT)
 	r.columns = columns
 	return r
 }
 
 // Update === SetType(UPDATE)
 func (r *Request) Update(tableName string) *Request {
-	r.SetType(2)
+	r.SetType(UPDATE)
 	r.tableName = tableName
 	return r
 }
 
 // Insert === SetType(INSERT)
 func (r *Request) Insert() *Request {
-	r.SetType(3)
+	r.SetType(INSERT)
 	return r
 }
 
 // Delete === SetType(DELETE)
 func (r *Request) Delete() *Request {
-	r.SetType(4)
+	r.SetType(DELETE)
 	return r
 }
 
@@ -196,8 +197,12 @@ func (r *Request) parseWhere() (string, error) {
 	fmt.Println(r.where, length)
 	if length > 0 {
 		for i := 0; i < length; i++ {
-			fmt.Println(length, i)
-			str = str + r.where[i].Column + r.where[i].Operator + r.where[i].Value
+			str = str + r.where[i].Column + r.where[i].Operator
+			if r.where[i].Native {
+				str = str + r.where[i].Value
+			} else {
+				str = str + "\"" + r.where[i].Value + "\""
+			}
 			if i+1 < length {
 				str = str + " " + r.where[i].ConcatOperator + " "
 			}

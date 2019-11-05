@@ -217,11 +217,11 @@ func RegistrateByEmail(c *gin.Context) {
 		Phone:    registrateByEmail.Phone,
 		Password: registrateByEmail.Password,
 	}
-	fmt.Println(newUser)
 	savedItem, err := newUser.Save()
+	fmt.Println("savedItem:", savedItem)
 	if err == nil {
 		token, err := users.Repo.CreateJWT(savedItem)
-		fmt.Println(len(token))
+		fmt.Println("tokenLength: ", len(token))
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
 			return
@@ -263,6 +263,7 @@ func AuthByEmail(c *gin.Context) {
 	fmt.Println(creds)
 	user, err := users.Repo.FindByEmail(creds.Email)
 	if err != nil {
+		fmt.Println("user", user)
 		c.JSON(http.StatusNotFound, gin.H{"msg": err.Error()})
 		return
 	}
