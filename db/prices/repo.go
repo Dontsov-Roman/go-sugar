@@ -64,7 +64,7 @@ func (r *Repository) Validate(item *Price) (bool, ValidateError) {
 	rows, err := Request.
 		Select([]string{}).
 		From(r.tableName).
-		Where(request.Condition{Column: ID, Operator: "=", Value: id, ConcatOperator: "OR"}).
+		Where(Request.NewCond(ID, "=", id)).
 		Query()
 	if err == nil {
 		selectedPrices := parseRows(rows)
@@ -100,7 +100,7 @@ func (r *Repository) DeleteByID(id string) bool {
 	str, sqlErr := Request.
 		Delete().
 		From(r.tableName).
-		Where(request.Condition{Column: ID, Operator: "=", Value: id, ConcatOperator: "OR"}).
+		Where(Request.NewCond(ID, "=", id)).
 		ToSQL()
 	if sqlErr != nil {
 		fmt.Println(sqlErr)

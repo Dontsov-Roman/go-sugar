@@ -28,22 +28,13 @@ type Request struct {
 	keys        []string
 	values      [][]string
 	set         map[string]string
-	where       []Condition
+	where       []*Condition
 	requestType requestType // SELECT UPDATE INSERT DELETE
 	orderBy     []string
 	orderAsc    bool
 	offset      int
 	limit       int
 	db          *sql.DB
-}
-
-// Condition for Where method
-type Condition struct {
-	Column         string
-	Operator       string
-	Value          string
-	ConcatOperator string
-	Native         bool
 }
 
 // Order uses for request
@@ -177,7 +168,7 @@ func (r *Request) Values(keys []string, values [][]string) *Request {
 }
 
 // Where add condition to array
-func (r *Request) Where(cond Condition) *Request {
+func (r *Request) Where(cond *Condition) *Request {
 	if cond.Column == "" || cond.Value == "" {
 		return r
 	}

@@ -66,7 +66,8 @@ func (r *Repository) GetAllReserve() []Reserve {
 	Request := request.New(DB)
 	var columns []string
 	columns = append(columns, ID, Time, TimeEnd)
-	req := Request.Select(columns).From(r.tableName).Where(request.Condition{Column: "time_end", Operator: ">", Value: "NOW()", Native: true})
+	condition := Request.NewCondition(TimeEnd, ">", "NOW()", "OR", true)
+	req := Request.Select(columns).From(r.tableName).Where(condition)
 	rows, err := req.Query()
 	sql, _ := req.ToSQL()
 	fmt.Println(sql)
@@ -116,7 +117,7 @@ func (r *Repository) Validate(item *Order) (bool, ValidateError) {
 	rows, err := Request.
 		Select([]string{}).
 		From(r.tableName).
-		Where(request.Condition{Column: "id", Operator: "=", Value: id, ConcatOperator: "OR"}).
+		Where(Request.NewCond(ID, "=", id)).
 		Query()
 	if err == nil {
 		selectedOrders := parseRows(rows)
@@ -141,7 +142,7 @@ func (r *Repository) DeleteByID(id string) bool {
 	str, sqlErr := Request.
 		Delete().
 		From(r.tableName).
-		Where(request.Condition{Column: "id", Operator: "=", Value: id, ConcatOperator: "OR"}).
+		Where(Request.NewCond(ID, "=", id)).
 		ToSQL()
 	if sqlErr != nil {
 		fmt.Println(sqlErr)

@@ -80,12 +80,13 @@ func (r *Repository) Validate(user *User) (bool, ValidateError) {
 	Request := request.New(DB)
 	id := strconv.Itoa(user.ID)
 	validateError := ValidateError{}
+
 	rows, err := Request.
 		Select([]string{}).
 		From(r.tableName).
-		Where(request.Condition{Column: "id", Operator: "=", Value: id, ConcatOperator: "OR"}).
-		Where(request.Condition{Column: "email", Operator: "=", Value: user.Email, ConcatOperator: "OR"}).
-		Where(request.Condition{Column: "phone", Operator: "=", Value: user.Phone, ConcatOperator: "OR"}).
+		Where(Request.NewCond(ID, "=", id)).
+		Where(Request.NewCond(Email, "=", user.Email)).
+		Where(Request.NewCond(Phone, "=", user.Phone)).
 		Query()
 	if err == nil {
 		selectedUsers := parseRows(rows)
@@ -130,7 +131,7 @@ func (r *Repository) DeleteByID(id string) bool {
 	str, sqlErr := Request.
 		Delete().
 		From(r.tableName).
-		Where(request.Condition{Column: "id", Operator: "=", Value: id, ConcatOperator: "OR"}).
+		Where(Request.NewCond(ID, "=", id)).
 		ToSQL()
 	if sqlErr != nil {
 		return false
@@ -149,7 +150,7 @@ func (r *Repository) FindByID(id string) (*User, error) {
 	rows, err := Request.
 		Select(columns).
 		From(r.tableName).
-		Where(request.Condition{Column: "id", Operator: "=", Value: id, ConcatOperator: "OR"}).
+		Where(Request.NewCond(ID, "=", id)).
 		Query()
 	if err == nil {
 		users := parseRows(rows)
@@ -165,7 +166,7 @@ func (r *Repository) FindByEmail(email string) (*User, error) {
 	Request := request.New(DB)
 	req := Request.Select([]string{}).
 		From(r.tableName).
-		Where(request.Condition{Column: "email", Operator: "=", Value: email, ConcatOperator: "OR"})
+		Where(Request.NewCond(Email, "=", email))
 	rows, err := req.
 		Query()
 

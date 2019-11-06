@@ -66,8 +66,8 @@ func (r *Repository) Validate(item *OrderPrice) (bool, ValidateError) {
 	rows, err := Request.
 		Select([]string{}).
 		From(r.tableName).
-		Where(request.Condition{Column: OrderID, Operator: "=", Value: id, ConcatOperator: "AND"}).
-		Where(request.Condition{Column: PriceID, Operator: "=", Value: priceID, ConcatOperator: "AND"}).
+		Where(Request.NewCondition(OrderID, "=", id, "AND", false)).
+		Where(Request.NewCondition(PriceID, "=", priceID, "AND", false)).
 		Query()
 	if err == nil {
 		selectedOrderPrices := parseRows(rows)
@@ -89,7 +89,7 @@ func (r *Repository) DeleteByOrderID(id string) bool {
 	str, sqlErr := Request.
 		Delete().
 		From(r.tableName).
-		Where(request.Condition{Column: OrderID, Operator: "=", Value: id, ConcatOperator: "OR"}).
+		Where(Request.NewCond(OrderID, "=", id)).
 		ToSQL()
 	if sqlErr != nil {
 		fmt.Println(sqlErr)
@@ -111,7 +111,7 @@ func (r *Repository) GetByOrderID(id string) []OrderPrice {
 	rows, err := Request.
 		Select([]string{}).
 		From(r.tableName).
-		Where(request.Condition{Column: OrderID, Operator: "=", Value: id, ConcatOperator: "OR"}).
+		Where(Request.NewCond(OrderID, "=", id)).
 		Query()
 	if err != nil {
 		fmt.Println(err)

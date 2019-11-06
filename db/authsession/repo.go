@@ -12,11 +12,11 @@ import (
 
 // Columns
 const (
-	UserID    string = "user_id"
-	DeviceID  string = "device_id"
-	Token     string = "token"
-	CreatedAt string = "created_at"
-	UpdatedAt string = "updated_at"
+	UserID         string = "user_id"
+	DeviceIDColumn string = "device_id"
+	Token          string = "token"
+	CreatedAt      string = "created_at"
+	UpdatedAt      string = "updated_at"
 )
 
 // Repository User Repository
@@ -33,8 +33,8 @@ func (r *Repository) CleanBeforeCreate(a *Auth) (bool, error) {
 	_, err := Request.
 		Delete().
 		From(r.tableName).
-		Where(request.Condition{Column: UserID, Operator: "=", Value: strconv.Itoa(a.UserID), ConcatOperator: "OR"}).
-		Where(request.Condition{Column: DeviceID, Operator: "=", Value: a.DeviceID, ConcatOperator: "OR"}).
+		Where(Request.NewCond(UserID, "=", strconv.Itoa(a.UserID))).
+		Where(Request.NewCond(DeviceIDColumn, "=", a.DeviceID)).
 		Exec()
 	if err != nil {
 		fmt.Println("CleanBeforeCreate: ", err)
@@ -62,7 +62,7 @@ func (r *Repository) GetByDeviceID(DeviceID string) (*Auth, error) {
 	rows, err := Request.
 		Select([]string{}).
 		From(r.tableName).
-		Where(request.Condition{Column: DeviceID, Operator: "=", Value: DeviceID, ConcatOperator: "OR"}).
+		Where(Request.NewCond(DeviceIDColumn, "=", DeviceID)).
 		OrderBy(orderBy).
 		Desc().
 		Limit(1).
