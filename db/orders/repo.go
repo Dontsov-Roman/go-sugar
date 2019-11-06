@@ -61,8 +61,8 @@ func (r *Repository) GetAll(o *request.Order) []Order {
 	return orders
 }
 
-// GetAllReserve return an array of Reserve
-func (r *Repository) GetAllReserve() []Reserve {
+// GetAllReserved return an array of Reserve
+func (r *Repository) GetAllReserved() []Reserve {
 	Request := request.New(DB)
 	var columns []string
 	columns = append(columns, ID, Time, TimeEnd)

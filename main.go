@@ -10,14 +10,14 @@ import (
 
 // Routes main struct for routes
 type Routes struct {
-	Profile string
-	Users   string
-	Prices  string
-	Orders  string
-	Reserve string
+	Profile  string
+	Users    string
+	Prices   string
+	Orders   string
+	Reserved string
 }
 
-var routes = Routes{Profile: "/profile", Users: "/users", Prices: "/prices", Orders: "/orders", Reserve: "/reserve"}
+var routes = Routes{Profile: "/profile", Users: "/users", Prices: "/prices", Orders: "/orders", Reserved: "/reserved"}
 
 func main() {
 	route := gin.Default()
@@ -51,7 +51,7 @@ func main() {
 	}
 
 	// Authorized
-	route.GET(routes.Reserve, routeshandlers.GetAllReserve)
+	route.GET(routes.Reserved, routeshandlers.GetAllReserved)
 	authorizedOrders := route.Group(routes.Orders)
 	{
 		authorizedOrders.Use(routeshandlers.AuthMiddleware)
