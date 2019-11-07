@@ -13,7 +13,7 @@ type User struct {
 	ID        int      `json:"ID"`
 	Name      string   `json:"Name"`
 	Password  string   `json:"Password"`
-	Type      int      `json:"Type"`
+	Role      int      `json:"Role"`
 	Status    int      `json:"Status"`
 	Email     string   `json:"Email"`
 	Phone     string   `json:"Phone"`
@@ -69,7 +69,7 @@ func (u *User) CheckPassword(password string) bool {
 
 // IsAdmin check if user is admin
 func (u *User) IsAdmin() bool {
-	if u.Type == 1 {
+	if u.Role == 1 {
 		return true
 	}
 	return false
@@ -89,6 +89,6 @@ func parseRows(rows *sql.Rows) []User {
 }
 func parseRow(row *sql.Rows) (User, error) {
 	p := User{}
-	err := row.Scan(&p.ID, &p.Type, &p.Email, &p.Phone, &p.Name, &p.CreatedAt, &p.UpdatedAt, &p.Status, &p.DeletedAt, &p.Password)
+	err := row.Scan(&p.ID, &p.Role, &p.Email, &p.Phone, &p.Name, &p.CreatedAt, &p.UpdatedAt, &p.Status, &p.DeletedAt, &p.Password)
 	return p, err
 }

@@ -21,7 +21,7 @@ const (
 	ID        string = "id"
 	Name      string = "name"
 	Password  string = "password"
-	Type      string = "type"
+	Role      string = "role"
 	Status    string = "status"
 	Email     string = "email"
 	Phone     string = "phone"
@@ -60,8 +60,8 @@ func (r *Repository) GetAll() []User {
 // Create new User
 func (r *Repository) Create(user *User) (*User, error) {
 	user.Password = r.CreateHash(user.Password)
-	str := `INSERT INTO ` + r.tableName + ` (type, email, phone, name, status, password) values(?, ?, ?, ?, ?, ?)`
-	result, err := DB.Exec(str, user.Type, user.Email, user.Phone, user.Name, user.Status, user.Password)
+	str := `INSERT INTO ` + r.tableName + ` (role, email, phone, name, status, password) values(?, ?, ?, ?, ?, ?)`
+	result, err := DB.Exec(str, user.Role, user.Email, user.Phone, user.Name, user.Status, user.Password)
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
@@ -117,8 +117,8 @@ func (r *Repository) Validate(user *User) (bool, ValidateError) {
 
 // Update user in DB
 func (r *Repository) Update(user *User) (bool, error) {
-	str := `UPDATE ` + r.tableName + ` SET name = ?, type = ?, status = ?, email = ?, phone = ? WHERE id = ?`
-	_, err := DB.Exec(str, user.Name, user.Type, user.Status, user.Email, user.Phone, user.ID)
+	str := `UPDATE ` + r.tableName + ` SET name = ?, role = ?, status = ?, email = ?, phone = ? WHERE id = ?`
+	_, err := DB.Exec(str, user.Name, user.Role, user.Status, user.Email, user.Phone, user.ID)
 	if err != nil {
 		return false, err
 	}
