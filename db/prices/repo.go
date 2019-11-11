@@ -1,6 +1,7 @@
 package prices
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -114,4 +115,24 @@ func (r *Repository) DeleteByID(id string) bool {
 	fmt.Println(result.LastInsertId()) // id последнего удаленого объекта
 	fmt.Println(result.RowsAffected()) // количество затронутых строк
 	return true
+}
+
+// GetByID - remove user from DB
+func (r *Repository) GetByID(id string) (*Price, error) {
+	Request := request.New(DB)
+	rows, err := Request.
+		Select([]string{}).
+		From(r.tableName).
+		Limit(1).
+		Where(Request.NewCond(ID, "=", id)).
+		Query()
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	prices := parseRows(rows)
+	if len(prices) < 1 {
+		return nil, errors.New("404")
+	}
+	return &prices[0], nil
 }

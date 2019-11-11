@@ -21,7 +21,7 @@ import (
 func GetAllUsers(c *gin.Context) {
 	data := users.Repo.GetAll()
 	if len(data) > 0 {
-		c.JSON(200, gin.H{"data": data})
+		c.JSON(http.StatusOK, gin.H{"data": data})
 		return
 	}
 	GetAllNoDataJSON(c)
@@ -69,7 +69,7 @@ func SaveUser(c *gin.Context) {
 func GetAllPrices(c *gin.Context) {
 	data := prices.Repo.GetAll()
 	if len(data) > 0 {
-		c.JSON(200, gin.H{"data": data})
+		c.JSON(http.StatusOK, gin.H{"data": data})
 		return
 	}
 	GetAllNoDataJSON(c)
@@ -83,6 +83,16 @@ func DeletePrice(c *gin.Context) {
 			Deleted(c)
 			return
 		}
+	}
+	GetAllNoDataJSON(c)
+}
+
+// GetPriceByID get Price by id
+func GetPriceByID(c *gin.Context) {
+
+	if data, err := prices.Repo.GetByID(c.Param("id")); err == nil {
+		c.JSON(http.StatusOK, gin.H{"data": data})
+		return
 	}
 	GetAllNoDataJSON(c)
 }
@@ -130,7 +140,7 @@ func GetAllOrdersByUser(c *gin.Context) {
 		data = orders.Repo.GetAllByUser(&order, user)
 	}
 	if len(data) > 0 {
-		c.JSON(200, gin.H{"data": data})
+		c.JSON(http.StatusOK, gin.H{"data": data})
 		return
 	}
 	GetAllNoDataJSON(c)
@@ -143,7 +153,7 @@ func GetAllOrders(c *gin.Context) {
 	order := request.Order{By: strings.Split(orderBy, ","), Asc: orderType == "ASC"}
 	data := orders.Repo.GetAll(&order)
 	if len(data) > 0 {
-		c.JSON(200, gin.H{"data": data})
+		c.JSON(http.StatusOK, gin.H{"data": data})
 		return
 	}
 	GetAllNoDataJSON(c)
@@ -153,7 +163,7 @@ func GetAllOrders(c *gin.Context) {
 func GetAllReserved(c *gin.Context) {
 	data := orders.Repo.GetAllReserved()
 	if len(data) > 0 {
-		c.JSON(200, gin.H{"data": data})
+		c.JSON(http.StatusOK, gin.H{"data": data})
 		return
 	}
 	GetAllNoDataJSON(c)

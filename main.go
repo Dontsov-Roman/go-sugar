@@ -45,6 +45,7 @@ func main() {
 	authorizedPrices := route.Group(routes.Prices)
 	{
 		authorizedPrices.Use(routeshandlers.AuthMiddleware)
+		authorizedPrices.GET("/:id", routeshandlers.GetPriceByID)
 		authorizedPrices.DELETE("/:id", routeshandlers.DeletePrice)
 		authorizedPrices.POST("", routeshandlers.SavePrice)
 		authorizedPrices.PUT("", routeshandlers.SavePrice)
