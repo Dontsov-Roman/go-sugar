@@ -37,6 +37,8 @@ func main() {
 	{
 		authorizedUsers.Use(routeshandlers.AuthMiddleware)
 		authorizedUsers.GET("", routeshandlers.GetAllUsers)
+		authorizedUsers.POST("", routeshandlers.SaveUser)
+		authorizedUsers.PUT("", routeshandlers.SaveUser)
 		authorizedUsers.DELETE("/:id", routeshandlers.DeleteUser)
 	}
 
