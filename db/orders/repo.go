@@ -69,8 +69,6 @@ func (r *Repository) GetAllReserved() []Reserve {
 	condition := Request.NewCondition(TimeEnd, ">", "NOW()", "OR", true)
 	req := Request.Select(columns).From(r.tableName).Where(condition)
 	rows, err := req.Query()
-	sql, _ := req.ToSQL()
-	fmt.Println(sql)
 	if err != nil {
 		fmt.Println(err)
 		return []Reserve{}
