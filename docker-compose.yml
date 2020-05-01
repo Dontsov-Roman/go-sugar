@@ -1,26 +1,49 @@
-version: "3"
+version: "3.3"
 
 services:
   web:
     build:
       context: .
       dockerfile: docker/go/Dockerfile
-    ports:
-      - 9000:9000
-    command: go run main.go
-    links:
-      - mysql
-    depends_on:
-      - mysql
-
-  mysql:
-    build:
-      context: .
-      dockerfile: docker/mysql/Dockerfile
+    env_file: .env
     environment:
       - MYSQL_DATABASE=${MYSQL_DATABASE}
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_ADDR=${MYSQL_DOCKER_ADDR}
+    ports:
+      - 9000:80
+    links:
+      - db
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  db:
+    image: mysql/mysql-server
+    restart: always
+    container_name: ${MYSQL_DOCKER_ADDR}
+    build:
+      context: .
+      dockerfile: docker/mysql/Dockerfile
+    env_file: .env
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    ports:
+      - 3308:3306
+    expose:
+      - '3308'
     volumes:
-      - ./volumes/db:/var/lib/mysql
+      - my-db:/var/lib/mysql
+    networks:
+      - app-network
+networks:
+  app-network:
+    driver: bridge
+volumes: 
+  my-db:

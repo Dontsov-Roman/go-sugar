@@ -1,9 +1,8 @@
 package main
 
 import (
-	"go-sugar/routeshandlers"
-
 	. "go-sugar/config"
+	"go-sugar/routeshandlers"
 
 	"github.com/gin-gonic/gin"
 )
