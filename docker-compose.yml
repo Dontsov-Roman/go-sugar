@@ -15,14 +15,13 @@ services:
     ports:
       - 9000:80
     links:
-      - db
+      - ${MYSQL_DOCKER_ADDR}
     depends_on:
-      - db
+      - ${MYSQL_DOCKER_ADDR}
     networks:
       - app-network
 
   db:
-    image: mysql/mysql-server
     restart: always
     container_name: ${MYSQL_DOCKER_ADDR}
     build:
